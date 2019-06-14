@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>História</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top justify-content-between">
+    <div class="container">
+      <a class="navbar-brand" href="#">História</a>
+      <button class="navbar-toggler border-0" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item active px-1">
+            <a class="nav-link rounded" href="#">Início
+              <span class="sr-only">(current)</span>
+            </a>
+          </li>
+          <li class="nav-item px-1">
+            <a class="nav-link rounded" href="#">Sobre</a>
+          </li>
+          <li class="nav-item px-1">
+            <a class="nav-link btn-primary rounded" href="#">Entrar</a>
+          </li>
+          <li class="nav-item px-1">
+            <a class="nav-link btn-secondary rounded" href="#">Cadastrar</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  <div class="container">
+    <div class="row">
+      {% block conteudo %}
+      {% endblock %}
+    </div>
+  </div>
+
+  <!-- Bootstrap core JavaScript -->
+  <script src="{% static 'jquery/jquery.slim.min.js' %}"></script>
+  <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="https://kit.fontawesome.com/46183de311.js"></script>
+
+</body>
+
+</html>
