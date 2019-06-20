@@ -1,3 +1,24 @@
 from django.db import models
 
-# Create your models here.
+
+class Usuario(models.Model):
+	nome = models.CharField('Nome', max_length=100)
+	matricula = models.CharField('Matrícula', max_length=14)
+	email = models.EmailField('Email')
+	professor = models.BooleanField('Professor')
+
+class Turma(models.Model):
+	nome = models.CharField('Nome', max_length=50)
+	usuarios = models.ManyToManyField(Usuario)
+
+class Atividade(models.Model):
+	peso = models.IntegerField('Peso')
+	inicio = models.DateField('Data de Início')
+	fim = models.DateField('Data de Fim')
+	turmas = models.ManyToManyField(Turma)
+
+class Grupo(models.Model):
+	nota = models.IntegerField('Nota')
+	usuarios = models.ManyToManyField(Usuario, limit_choices_to={'professor': False})
+	atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE)
+
