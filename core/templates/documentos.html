@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+				<ul class="list-group">
+					{% for documento in documentos %}
+					<li class="list-group-item">{{documento}}</li>
+					{% empty %}
+					<li class="list-group-item">Nenhum documento cadastrado</li>
+					{% endfor %}
+				</ul>
+{% endblock %}

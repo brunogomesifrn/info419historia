@@ -17,10 +17,17 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from core.views import home
+from core.views import home, usuarios, turmas, atividades, atividade_cadastro, atividade, grupos, documentos
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home)
+    path('', home),
+    path('usuarios/', usuarios, name='usuarios'),
+    path('turmas/', turmas, name='turmas'),
+    path('atividades/', atividades, name='atividades'),
+    path('atividades/<int:id>/', atividade, name='atividade'),
+    path('atividades/cadastrar/', atividade_cadastro, name='atividade_cadastro'),
+    path('grupos/', grupos, name='grupos'),
+    path('documentos/', documentos, name='documentos'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

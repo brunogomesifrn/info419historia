@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+				<form method="post" class="mt-5">
+					{% csrf_token %}
+					{{form}}
+          <button type="submit" class="btn btn-primary">Salvar</button>
+				</form>
+{% endblock %}

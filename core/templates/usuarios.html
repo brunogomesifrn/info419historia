@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+				<ul class="list-group">
+					{% for usuario in usuarios %}
+					<li class="list-group-item">{{usuario}}</li>
+					{% empty %}
+					<li class="list-group-item">Nenhum usuário cadastrado</li>
+					{% endfor %}
+				</ul>
+{% endblock %}

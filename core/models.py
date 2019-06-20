@@ -7,10 +7,16 @@ class Usuario(models.Model):
 	email = models.EmailField('Email')
 	professor = models.BooleanField('Professor')
 
+	def __str__(self):
+		return self.nome
+
 
 class Turma(models.Model):
 	nome = models.CharField('Nome', max_length=50)
-	usuarios = models.ManyToManyField(Usuario)
+	membros = models.ManyToManyField(Usuario)
+
+	def __str__(self):
+		return self.nome
 
 
 class Atividade(models.Model):
@@ -19,23 +25,32 @@ class Atividade(models.Model):
 	fim = models.DateField('Data de Fim')
 	turmas = models.ManyToManyField(Turma)
 
+	def __str__(self):
+		return "Atividade %d" % self.id
+
 
 class Grupo(models.Model):
 	nota = models.IntegerField('Nota')
-	usuarios = models.ManyToManyField(Usuario, limit_choices_to={'professor': False})
+	membros = models.ManyToManyField(Usuario, limit_choices_to={'professor': False})
 	atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE)
 
 
+class Documento(models.Model):
+	texto = models.TextField('Texto')
+	arquivo = models.FileField('Arquivo', upload_to='documentos', null=True, blank=True)
+
+	def __str__(self):
+		return "Documento " + self.id
+
+
 class Questao(models.Model):
-	comando = models.CharField('Comando', max_length=500)
+	comando = models.TextField('Comando')
 	peso = models.IntegerField('Peso')
+	atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE, null=True)
+	documentos = models.ManyToManyField(Documento)
 
 
 class Alternativa(models.Model):
-	texto = models.CharField('Texto', max_length=500)
+	texto = models.TextField('Texto')
 	peso = models.IntegerField('Peso')
-
-
-class Documento(models.Model):
-	texto = models.CharField('Texto', max_length=10000)
-	arquivo = models.FileField('Arquivo', upload_to='documentos', null=True, blank=True)
+	questao = models.ForeignKey(Questao, on_delete=models.CASCADE, null=True)

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+				<h1 class="mt-5">{{atividade}}</h1>
+				{% for questao in questoes %}
+				<h3>{{forloop.counter}}. {{questao.comando}}</h3>
+				<ul>
+					{% for alternativa in questoes.alternativa_set %}
+					<li>{{alternativa.texto}}</li>
+					{% empty %}
+					<li>Nenhuma alternativa cadastrada</li>
+					{% endfor %}
+				</ul>
+				{% empty %}
+				<h3 class="mt-5">Nenhuma questão cadastrada</h3>
+				{% endfor %}
+{% endblock %}

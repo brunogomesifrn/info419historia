@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+				<ul class="list-group">
+					{% for atividade in atividades %}
+					<li class="list-group-item"><a href="{% url 'atividade' atividade.id %}">{{atividade}}</a></li>
+					{% empty %}
+					<li class="list-group-item">Nenhuma atividade cadastrada</li>
+					{% endfor %}
+				</ul>
+{% endblock %}
