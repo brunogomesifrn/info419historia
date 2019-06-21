@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from core.views import home, usuarios, turmas, atividades, atividade_cadastro, atividade, grupos, documentos
+from core.views import home, usuarios, turmas, atividades, atividade_cadastro, atividade, grupos, documentos, documento_cadastro
 
 
 urlpatterns = [
@@ -30,4 +30,5 @@ urlpatterns = [
     path('atividades/cadastrar/', atividade_cadastro, name='atividade_cadastro'),
     path('grupos/', grupos, name='grupos'),
     path('documentos/', documentos, name='documentos'),
+    path('documentos/cadastrar/', documento_cadastro, name='documento_cadastro'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

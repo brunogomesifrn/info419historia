@@ -21,8 +21,8 @@ class Turma(models.Model):
 
 class Atividade(models.Model):
 	peso = models.IntegerField('Peso')
-	inicio = models.DateField('Data de Início')
-	fim = models.DateField('Data de Fim')
+	inicio = models.DateTimeField('Início')
+	fim = models.DateTimeField('Fim')
 	turmas = models.ManyToManyField(Turma)
 
 	def __str__(self):
@@ -40,7 +40,7 @@ class Documento(models.Model):
 	arquivo = models.FileField('Arquivo', upload_to='documentos', null=True, blank=True)
 
 	def __str__(self):
-		return "Documento " + self.id
+		return "Documento %d" % self.id
 
 
 class Questao(models.Model):

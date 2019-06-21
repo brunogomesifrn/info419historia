@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
-from .forms import UsuarioForm, AtividadeForm
+from .forms import UsuarioForm, AtividadeForm, DocumentoForm, QuestaoForm, AlternativaForm
 from .models import Usuario, Turma, Atividade, Grupo, Documento, Questao, Alternativa
+import json
 
 # Create your views here.
 def home(request):
@@ -28,9 +29,19 @@ def atividades(request):
 	return render(request, 'atividades.html', contexto)
 
 def atividade_cadastro(request):
-	form = AtividadeForm(request.POST or None)
-	if form.is_valid():
-		form.save()
+	form = {
+		'atividade': AtividadeForm(request.POST or None),
+		'questao': QuestaoForm(request.POST or None),
+		'alternativa': AlternativaForm(request.POST or None)
+	}
+	if form['atividade'].is_valid() and form['questao'].is_valid() and form['alternativa'].is_valid():
+		atividade = form['atividade'].save()
+		questao = form['questao'].save(commit=False)
+		questao.atividade = atividade
+		questao.save()
+		alternativa = form['alternativa'].save(commit=False)
+		alternativa.questao = questao
+		alternativa.save()
 		return redirect('atividades')
 	contexto = {
 		'form': form
@@ -39,7 +50,7 @@ def atividade_cadastro(request):
 
 def atividade(request, id):
 	atividade = Atividade.objects.get(pk=id)
-	questoes = Questao.objects.filter(atividade=atividade)
+	questoes = atividade.questao_set.all()
 	contexto = {
 		'atividade': atividade,
 		'questoes': questoes,
@@ -60,3 +71,13 @@ def documentos(request):
 		'documentos': documentos,
 	}
 	return render(request, 'documentos.html', contexto)
+
+def documento_cadastro(request):
+	form = DocumentoForm(request.POST or None)
+	if form.is_valid():
+		form.save()
+		return redirect('atividade_cadastro')
+	contexto = {
+		'form': form
+	}
+	return render(request, 'documento_cadastro.html', contexto)

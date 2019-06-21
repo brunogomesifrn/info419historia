@@ -1,9 +1,49 @@
 {% extends 'base.html' %}
+{% load widget_tweaks %}
 
 {% block conteudo %}
-				<form method="post" class="mt-5">
-					{% csrf_token %}
-					{{form}}
-          <button type="submit" class="btn btn-primary">Salvar</button>
-				</form>
+				<div class="col-lg-12 text-center pt-5">
+					<h1>Cadastrar nova atividade</h1>
+					<form method="post">
+						{% csrf_token %}
+						{% for field in form.atividade %}
+						<div class="control-group form-group">
+	            <div class="controls">
+	              <label>{{field.label}}</label>
+	              {{field|add_class:'form-control'}}
+	              <p class="help-block"></p>
+	            </div>
+	          </div>
+	          {% endfor %}
+
+	          <h3 class="mt-5">Questão 1</h3>
+						{% for field in form.questao %}
+						<div class="control-group form-group">
+	            <div class="controls">
+	              <label>{{field.label}}</label>
+	              {{field|add_class:'form-control'}}
+								{% if forloop.last %}
+								<a href="{% url 'documento_cadastro' %}">Cadastrar novo</a>
+								{% endif %}
+	              <p class="help-block"></p>
+	            </div>
+	          </div>
+						{% endfor %}
+
+						{% for _ in ''|center:4 %}
+						<h4>Alternativa {{forloop.counter}}</h4>
+						{% for field in form.alternativa %}
+						<div class="control-group form-group">
+	            <div class="controls">
+	              <label>{{field.label}}</label>
+	              {{field|add_class:'form-control'}}
+	              <p class="help-block"></p>
+	            </div>
+	          </div>
+						{% endfor %}
+						{% endfor %}
+
+	          <button type="submit" class="btn btn-primary">Salvar</button>
+					</form>
+				</div>
 {% endblock %}
