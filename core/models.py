@@ -23,10 +23,8 @@ class Atividade(models.Model):
 	peso = models.IntegerField('Peso')
 	inicio = models.DateTimeField('Início')
 	fim = models.DateTimeField('Fim')
-	turmas = models.ManyToManyField(Turma)
+	#turmas = models.ManyToManyField(Turma)
 
-	def __str__(self):
-		return "Atividade %d" % self.id
 
 
 class Grupo(models.Model):

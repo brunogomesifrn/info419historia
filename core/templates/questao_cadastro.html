@@ -6,16 +6,24 @@
 					<h1>Cadastrar nova atividade</h1>
 					<form method="post">
 						{% csrf_token %}
+	          <h3 class="mt-5">Questão 1</h3>
 						{% for field in form %}
+						{% if field.field.widget.input_type == 'hidden' %}
+						{{field}}
+						{% else %}
 						<div class="control-group form-group">
 	            <div class="controls">
 	              <label>{{field.label}}</label>
 	              {{field|add_class:'form-control'}}
+								{% if forloop.last %}
+								<a href="{% url 'documento_cadastro' %}">Cadastrar novo</a>
+								{% endif %}
 	              <p class="help-block"></p>
 	            </div>
 	          </div>
-	          {% endfor %}
-            <button type="submit" class="btn btn-primary">Continuar</button>
+	          {% endif %}
+						{% endfor %}
+	          <button type="submit" class="btn btn-primary">Continuar</button>
 					</form>
 				</div>
 {% endblock %}

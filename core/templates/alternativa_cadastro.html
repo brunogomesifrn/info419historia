@@ -6,6 +6,9 @@
 					<h1>Cadastrar nova atividade</h1>
 					<form method="post">
 						{% csrf_token %}
+            {{questao_hidden_form}}
+
+						<h4>Alternativa 1</h4>
 						{% for field in form %}
 						<div class="control-group form-group">
 	            <div class="controls">
@@ -14,8 +17,9 @@
 	              <p class="help-block"></p>
 	            </div>
 	          </div>
-	          {% endfor %}
-            <button type="submit" class="btn btn-primary">Continuar</button>
+            {% endfor %}
+
+	          <button type="submit" class="btn btn-primary">Salvar</button>
 					</form>
 				</div>
 {% endblock %}

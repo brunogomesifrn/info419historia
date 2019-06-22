@@ -44,12 +44,20 @@ class DocumentoForm(forms.ModelForm):
 
 
 class QuestaoForm(forms.ModelForm):
+	prefix = 'questao'
 	class Meta:
 		model = Questao
-		fields = ['comando', 'peso', 'documentos']
+		fields = ['comando', 'peso', 'documentos', 'atividade']
+		widgets = {
+			'atividade': forms.HiddenInput(),
+		}
 
 
 class AlternativaForm(forms.ModelForm):
+	prefix = 'alternativa'
 	class Meta:
 		model = Alternativa
-		fields = ['texto', 'peso']
+		fields = ['texto', 'peso', 'questao']
+		widgets = {
+			'questao': forms.HiddenInput(),
+		}
