@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import UsuarioForm, AtividadeForm, AtividadeHiddenForm, DocumentoForm, QuestaoForm, QuestaoHiddenForm, AlternativaForm
+from .forms import UsuarioForm, AtividadeForm, DocumentoForm, QuestaoForm, AlternativaForm
 from .models import Usuario, Turma, Atividade, Grupo, Documento, Questao, Alternativa
 from django.core import serializers
 from django.http import QueryDict
