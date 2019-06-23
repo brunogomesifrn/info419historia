@@ -1,21 +1,112 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
+{% load core_extras %}
 
 {% block conteudo %}
 				<div class="col-lg-12 text-center pt-5">
 					<h1>Cadastrar nova atividade</h1>
 					<form method="post">
 						{% csrf_token %}
-						{% for field in form %}
+            {# O laço passa por todos os campos do formulário de atividade #}
+						{% for field in atividade_form %}
 						<div class="control-group form-group">
 	            <div class="controls">
 	              <label>{{field.label}}</label>
-	              {{field|add_class:'form-control'}}
+                {{field|add_class:'form-control'}}
+                {# Se o campo for um "select", mostrar os links "atualiar" e "cadastrar nova" #}
+                {% if field.field.widget.input_type == 'select' %}
+                <button type="submit" class="btn btn-link" name="acao" value="atualizar">Atualizar</button>
+                <a href="{% url 'turma_cadastro' %}" target="_blank">Cadastrar nova</a>
+                {% endif %}
 	              <p class="help-block"></p>
 	            </div>
 	          </div>
 	          {% endfor %}
-            <button type="submit" class="btn btn-primary">Continuar</button>
+            {# O laço passa pelos formulários de todas as questões #}
+            {% for questao_form in questoes_forms %}
+            {# A função with permite criar variáveis. "forloop.counter" armazena a quantidade de vezes que o laço foi executado #}
+            {% with n=forloop.counter %}
+            <hr />
+            <h3 class="mt-5">Questão {{n}}</h3>
+            {# O laço passa por todos os campos do formulário de questão #}
+            {% for field in questao_form %}
+            <div class="control-group form-group">
+              <div class="controls">
+                <label>{{field.label}}</label>
+                {{field|add_class:'form-control'}}
+                {% if field.field.widget.input_type == 'select' %}
+                <button type="submit" class="btn btn-link" name="acao" value="atualizar">Atualizar</button>
+                <a href="{% url 'documento_cadastro' %}" target="_blank">Cadastrar novo</a>
+                {% endif %}
+                <p class="help-block"></p>
+              </div>
+            </div>
+            {% endfor %}
+            {# "index" permite recuperar o valor da lista numa certa posição. "forloop.counter0" armazena a quantidade de vezes que o laço foi executado, começando do 0. Assim, a variável "alternativas_forms" vai guardar o valor numa certa posição de "alternativas_forms_questao" #}
+            {% with alternativas_forms=alternativas_forms_questao|index:forloop.counter0 %}
+            {% for alternativa_form in alternativas_forms %}
+            <h4>Alternativa {{forloop.counter}}</h6>
+            {% for field in alternativa_form %}
+            <div class="control-group form-group">
+              <div class="controls">
+                <label>{{field.label}}</label>
+                {{field|add_class:'form-control'}}
+                <p class="help-block"></p>
+              </div>
+            </div>
+            {% endfor %}
+            {% endfor %}
+            {# É utilizado um input escondido para armazenar o númeor de alternativas atual e poder enviar de volta para views.py #}
+            <input type="hidden" name="quant_alternativas-q{{n}}" class="form-control" value="{{alternativas_forms|length}}" required />
+            <button type="submit" class="btn btn-outline-success btn-sm my-2" name="acao" value="nova_alternativa-q{{n}}">Adicionar alternativa</button>
+            <button type="submit" class="btn btn-outline-danger btn-sm my-2" name="acao" value="remover_alternativa-q{{n}}">Remover alternativa</button><br/>
+            {% endwith %}
+            {% endwith %}
+            {% endfor %}
+            <input type="hidden" name="quant_questoes" class="form-control" value="{{questoes_forms|length}}" required />
+            <button type="submit" class="btn btn-success my-2" name="acao" value="nova_questao">Adicionar questão</button>
+            <button type="submit" class="btn btn-danger my-2" name="acao" value="remover_questao">Remover questão</button><br/>
+            <button type="submit" class="btn btn-primary btn-lg my-2" name="acao" value="salvar">Salvar</button>
 					</form>
 				</div>
+{% endblock %}
+
+{% block scripts %}
+          <script type="text/javascript">
+            $(function(e) {
+              {# Sempre um botão que tenha "name=acao", um novo input será criado e enviará para views.py a ação que deverá acontecer. Por exemplo, adicionar uma nova questão ou salvar ou dados. #}
+              $('button[name=acao]').click(function(){
+                $('form').append(
+                  $('<input[type=hidden]>')
+                    .attr('name', 'acao')
+                    .val($(this).val())
+                )
+              });
+
+
+              {# A função "able_disable" testa se todos os inputs, textareas e selects possuem algum valor. Se não, o botão "salvar" será desativado #}
+              var $salvar_btn = $('button[value="salvar"]');
+              able_disable = function(){
+                state = false
+                $('input[type!=hidden], textarea, select').each(function(){
+                  state = state || $(this).val() == '';
+                });
+                $salvar_btn.prop('disabled', state);
+              }
+              {# Sempre que for mudado o valor ou precissionada uma tecla dentro de um input, textarea ou select, a função "able_disable" será chamada, para ativivar ou desativar o botão "salvar" quando necessário #}
+              $('input, textarea, select')
+                .change(function(){able_disable();})
+                .keyup(function(){able_disable();});
+              able_disable()
+
+              {# Se houver 1 questão ou menos, o botão "remover questão" será desativado #}
+              if ($('input[name=quant_questoes]').val() <= 1)
+                $('button[value=remover_questao]').prop('disabled', true);
+              {# Se houver 2 alternativas ou menos, o botão "remover alternativa" correspondente será desativado #}
+              {% for n in questoes_forms|length|trange %}
+              if ($('input[name=quant_alternativas-q{{n}}]').val() <= 2)
+                $('button[value=remover_alternativa-q{{n}}]').prop('disabled', true);
+              {% endfor %}
+            });
+          </script>
 {% endblock %}

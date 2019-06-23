@@ -13,6 +13,7 @@
 
   <!-- Bootstrap core CSS -->
   <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/46183de311.js"></script>
 
 </head>
 
@@ -57,8 +58,8 @@
   <!-- Bootstrap core JavaScript -->
   <script src="{% static 'jquery/jquery.slim.min.js' %}"></script>
   <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-  <script src="https://kit.fontawesome.com/46183de311.js"></script>
-
+  {% block scripts %}
+  {% endblock %}
 </body>
 
 </html>

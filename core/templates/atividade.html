@@ -5,11 +5,14 @@
 					<h1>{{atividade}}</h1>
 					{% for questao in questoes %}
 					<h3>{{forloop.counter}}. {{questao.comando}}</h3>
-					<ul>
+					<ul class="list-group">
 						{% for alternativa in questao.alternativa_set.all %}
-						<li>{{alternativa.texto}}</li>
+						<li class="list-group-item d-flex justify-content-between align-items-center">
+							{{alternativa.texto}}
+    					<span class="badge badge-primary badge-pill">{{alternativa.peso}}</span>
+						</li>
 						{% empty %}
-						<li>Nenhuma alternativa cadastrada</li>
+						<li class="list-group-item">Nenhuma alternativa cadastrada</li>
 						{% endfor %}
 					</ul>
 					{% empty %}

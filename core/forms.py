@@ -24,7 +24,7 @@ class TurmaForm(forms.ModelForm):
 class AtividadeForm(forms.ModelForm):
 	class Meta:
 		model = Atividade
-		fields = ['peso', 'inicio', 'fim']
+		fields = ['peso', 'inicio', 'fim', 'turmas']
 		widgets = {
 			'inicio': get_proper_date_time_input(),
 			'fim': get_proper_date_time_input(),
@@ -44,20 +44,12 @@ class DocumentoForm(forms.ModelForm):
 
 
 class QuestaoForm(forms.ModelForm):
-	prefix = 'questao'
 	class Meta:
 		model = Questao
-		fields = ['comando', 'peso', 'documentos', 'atividade']
-		widgets = {
-			'atividade': forms.HiddenInput(),
-		}
+		fields = ['comando', 'peso', 'documentos']
 
 
 class AlternativaForm(forms.ModelForm):
-	prefix = 'alternativa'
 	class Meta:
 		model = Alternativa
-		fields = ['texto', 'peso', 'questao']
-		widgets = {
-			'questao': forms.HiddenInput(),
-		}
+		fields = ['texto', 'peso']

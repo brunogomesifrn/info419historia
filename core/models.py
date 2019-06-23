@@ -20,10 +20,10 @@ class Turma(models.Model):
 
 
 class Atividade(models.Model):
-	peso = models.IntegerField('Peso')
-	inicio = models.DateTimeField('Início')
-	fim = models.DateTimeField('Fim')
-	#turmas = models.ManyToManyField(Turma)
+	peso = models.IntegerField('Peso', blank=True)
+	inicio = models.DateTimeField('Início', blank=True)
+	fim = models.DateTimeField('Fim', blank=True)
+	turmas = models.ManyToManyField(Turma, blank=True)
 
 
 
@@ -42,13 +42,13 @@ class Documento(models.Model):
 
 
 class Questao(models.Model):
-	comando = models.TextField('Comando')
-	peso = models.IntegerField('Peso')
+	comando = models.TextField('Comando', blank=True)
+	peso = models.IntegerField('Peso', blank=True)
 	atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE, null=True)
-	documentos = models.ManyToManyField(Documento)
+	documentos = models.ManyToManyField(Documento, blank=True)
 
 
 class Alternativa(models.Model):
-	texto = models.TextField('Texto')
-	peso = models.IntegerField('Peso')
+	texto = models.TextField('Texto', blank=True)
+	peso = models.IntegerField('Peso', blank=True)
 	questao = models.ForeignKey(Questao, on_delete=models.CASCADE, null=True)

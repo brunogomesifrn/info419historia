@@ -2,13 +2,10 @@
 {% load widget_tweaks %}
 
 {% block conteudo %}
-				<div class="col-lg-12 text-center pt-5">
-					<h1>Cadastrar nova atividade</h1>
+				<div class="col-lg-12 text-center">
+					<h1 class="mt-5">Cadastrar novo usuário</h1>
 					<form method="post">
 						{% csrf_token %}
-            {{questao_hidden_form}}
-
-						<h4>Alternativa 1</h4>
 						{% for field in form %}
 						<div class="control-group form-group">
 	            <div class="controls">
@@ -17,8 +14,7 @@
 	              <p class="help-block"></p>
 	            </div>
 	          </div>
-            {% endfor %}
-
+						{% endfor %}
 	          <button type="submit" class="btn btn-primary">Salvar</button>
 					</form>
 				</div>

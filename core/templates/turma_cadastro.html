@@ -2,28 +2,23 @@
 {% load widget_tweaks %}
 
 {% block conteudo %}
-				<div class="col-lg-12 text-center pt-5">
-					<h1>Cadastrar nova atividade</h1>
+				<div class="col-lg-12 text-center">
+					<h1 class="mt-5">Cadastrar nova turma</h1>
 					<form method="post">
 						{% csrf_token %}
-	          <h3 class="mt-5">Questão 1</h3>
 						{% for field in form %}
-						{% if field.field.widget.input_type == 'hidden' %}
-						{{field}}
-						{% else %}
 						<div class="control-group form-group">
 	            <div class="controls">
 	              <label>{{field.label}}</label>
 	              {{field|add_class:'form-control'}}
-								{% if forloop.last %}
-								<a href="{% url 'documento_cadastro' %}">Cadastrar novo</a>
-								{% endif %}
+                {% if forloop.last %}
+                <a href="{% url 'usuario_cadastro' %}" target="_blank">Cadastrar novo</a>
+                {% endif %}
 	              <p class="help-block"></p>
 	            </div>
 	          </div>
-	          {% endif %}
 						{% endfor %}
-	          <button type="submit" class="btn btn-primary">Continuar</button>
+	          <button type="submit" class="btn btn-primary">Salvar</button>
 					</form>
 				</div>
 {% endblock %}
