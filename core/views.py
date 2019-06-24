@@ -1,14 +1,19 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import UsuarioForm, TurmaForm, AtividadeForm, DocumentoForm, QuestaoForm, AlternativaForm
-from .models import Usuario, Turma, Atividade, Grupo, Documento, Questao, Alternativa
-from django.core import serializers
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
+from .forms import UsuarioForm, TurmaForm, AtividadeForm, TipoForm, DocumentoForm, QuestaoForm, AlternativaForm
+from .models import Turma, Atividade, Grupo, Documento, Questao, Alternativa
 
 # Create your views here.
-def home(request):
-	return render(request, 'index.html')
+def inicio(request):
+	contexto = {
+		'current': 'inicio'
+	}
+	return render(request, 'index.html', contexto)
 
 def usuarios(request):
-	usuarios = Usuario.objects.order_by('nome')
+	usuarios = User.objects.order_by('nome')
 	contexto = {
 		'usuarios': usuarios,
 	}
@@ -20,10 +25,30 @@ def usuario_cadastro(request):
 		form.save()
 		return redirect('usuarios')
 	contexto = {
+		'form': form,
+		'current': 'cadastrar',
+	}
+	return render(request, 'usuario_cadastro.html', contexto)
+
+@login_required
+def usuario_edicao(request, id):
+	usuario = get_object_or_404(User, pk=id)
+	form = UsuarioForm(request.POST or None, instance=usuario)
+	if form.is_valid():
+		form.save()
+		return redirect('usuarios')
+	contexto = {
 		'form': form
 	}
 	return render(request, 'usuario_cadastro.html', contexto)
 
+@login_required
+def usuario_remocao(request, id):
+	usuario = get_object_or_404(User, pk=id)
+	usuario.delete()
+	return render(request, 'usuarios.html')
+
+@login_required
 def turmas(request):
 	turmas = Turma.objects.order_by('nome')
 	contexto = {
@@ -31,6 +56,7 @@ def turmas(request):
 	}
 	return render(request, 'turmas.html', contexto)
 
+@login_required
 def turma_cadastro(request):
 	form = TurmaForm(request.POST or None)
 	if form.is_valid():
@@ -41,6 +67,7 @@ def turma_cadastro(request):
 	}
 	return render(request, 'turma_cadastro.html', contexto)
 
+@login_required
 def atividades(request):
 	atividades = Atividade.objects.all()
 	contexto = {
@@ -48,11 +75,12 @@ def atividades(request):
 	}
 	return render(request, 'atividades.html', contexto)
 
+@login_required
 def atividade_cadastro(request):
 	# Ação recebida pelo formulário
 	acao = request.POST['acao'] if 'acao' in request.POST else ''
 
-	atividade_form = AtividadeForm(request.POST or None)
+	atividade_form = AtividadeForm(request.POST or None, use_required_attribute=False)
 
 	# A quantidade de questões, inicialmente, é um, mas pode mudar de acordo com o valor recebido pelo formulário e se a ação for nova questão ou remover
 	quant_questoes = 1
@@ -74,13 +102,13 @@ def atividade_cadastro(request):
 	alternativas_forms_questao = []
 	for n in range(1, quant_questoes+1):
 		# É armazemado um formulário para cada questão, todos dentro da lista "questoes_forms". O parâmetro "prefix" serve pata nomear cada formulário e evitar que os dados sejam misturados. As questões são nomeadas "questao1", "questao2", ...
-		questoes_forms.append(QuestaoForm(request.POST or None, prefix="questao%d" % n))
+		questoes_forms.append(QuestaoForm(request.POST or None, prefix="questao%d" % n, use_required_attribute=False))
 		# Essa lista armazenará somente os formulários as alternativas da mesma questão
 		alternativas_forms = []
 		# O laço vai de 1 a quantidade de alternativas da questão n
 		for m in range(1, quant_alternativas[n-1]+1):
 			# Arzenados os formulários das alternativas com o prefix "alternativa1-q1", "alternativa2-q1", ..., "alternativa1-q2", "alternativa2-q2", ...
-			alternativas_forms.append(AlternativaForm(request.POST or None, prefix="alternativa%d-q%d" % (m, n))
+			alternativas_forms.append(AlternativaForm(request.POST or None, prefix="alternativa%d-q%d" % (m, n), use_required_attribute=False)
 			)
 		# Armazenada as listas na outra
 		alternativas_forms_questao.append(alternativas_forms)
@@ -111,6 +139,7 @@ def atividade_cadastro(request):
 	}
 	return render(request, 'atividade_cadastro.html', contexto)
 
+@login_required
 def atividade(request, id):
 	atividade = get_object_or_404(Atividade, pk=id)
 	questoes = atividade.questao_set.all()
@@ -120,7 +149,7 @@ def atividade(request, id):
 	}
 	return render(request, 'atividade.html', contexto)
 
-
+@login_required
 def grupos(request):
 	grupos = Grupo.objects.all()
 	contexto = {
@@ -128,6 +157,7 @@ def grupos(request):
 	}
 	return render(request, 'grupos.html', contexto)
 
+@login_required
 def documentos(request):
 	documentos = Documento.objects.all()
 	contexto = {
@@ -135,12 +165,24 @@ def documentos(request):
 	}
 	return render(request, 'documentos.html', contexto)
 
+@login_required
 def documento_cadastro(request):
-	form = DocumentoForm(request.POST or None)
+	if 'composicao' in request.POST:
+		composicao = request.POST['composicao']
+		if composicao == 0: request.POST['arquivo'] = None
+		elif composicao == 1: request.POST['texto'] = None
+	form = DocumentoForm(request.POST or None, use_required_attribute=False)
+	tipo_form = TipoForm(request.POST or None, use_required_attribute=False)
+	if tipo_form.is_valid():
+		tipo = tipo_form.save()
+		data = form.data.copy()
+		data['tipo'] = tipo.id
+		form = DocumentoForm(data)
 	if form.is_valid():
 		form.save()
 		return redirect('atividade_cadastro')
 	contexto = {
-		'form': form
+		'form': form,
+		'tipo_form': tipo_form,
 	}
 	return render(request, 'documento_cadastro.html', contexto)

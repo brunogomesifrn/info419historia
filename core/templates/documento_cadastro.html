@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
+{% load core_extras %}
 
 {% block conteudo %}
 				<div class="col-lg-12 text-center">
@@ -11,11 +12,66 @@
 	            <div class="controls">
 	              <label>{{field.label}}</label>
 	              {{field|add_class:'form-control'}}
+                {% if field.name == 'tipo' %}
+                <p><input class="my-2" type="checkbox" name="novo" /> Novo</p>
+                {% endif %}
 	              <p class="help-block"></p>
 	            </div>
 	          </div>
 						{% endfor %}
+            {% for field in tipo_form %}
+            <div class="control-group form-group">
+              <div class="controls">
+                <label>{{field.label}}</label>
+                {{field|add_class:'form-control'}}
+                <p class="help-block"></p>
+              </div>
+            </div>
+            {% endfor %}
 	          <button type="submit" class="btn btn-primary">Salvar</button>
 					</form>
 				</div>
+{% endblock %}
+
+{% block scripts %}
+          <script type="text/javascript">
+          	$(function(){
+          		$arquivoDiv = $('input[name=arquivo]').parents('.form-group');
+          		$textoDiv = $('textarea[name=texto]').parents('.form-group');
+          		$arquivoDiv.hide();
+          		$('<div class="control-group form-group">')
+      					.append($('<div class="controls">')
+      						.append($('<label>O documento será composto por um:</label>'))
+      						.append($('<select class="form-control" name="composicao">')
+      							.append(
+      								$('<option value=0 selected>Texto</option>'),
+        							$('<option value=1>Arquivo</option>')
+        						).change(function(){
+        							$this = $(this);
+        							if ($this.val() == '0') {
+      									$textoDiv.show();
+      									$arquivoDiv.hide();
+        							}
+        							else {
+      									$textoDiv.hide();
+      									$arquivoDiv.show();
+        							}
+        						}))
+      					).insertBefore($textoDiv);
+                $tipoDiv = $('select[name=tipo]').parents('.form-group');
+                $nomeDiv = $('input[name=nome]').parents('.form-group');
+                $nomeDiv.hide()
+                $('input[name=novo]').change(function() {
+                  if ($(this).is(':checked')) {
+                    $tipoDiv.hide()
+                    $nomeDiv.show()
+                    $('input[name=novo]').parent().insertAfter($('input[name=nome]'))
+                  } else {
+                    $tipoDiv.show()
+                    $nomeDiv.hide()
+                    $('input[name=novo]').parent().insertAfter($('select[name=tipo]'))
+                  }
+                })
+          	});
+          </script>
 {% endblock %}

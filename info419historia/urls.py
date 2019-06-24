@@ -17,14 +17,19 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from core.views import home, usuarios, usuario_cadastro, turmas, turma_cadastro, atividades, atividade_cadastro, atividade, grupos, documentos, documento_cadastro
+from django.contrib.auth import views as auth_views
+from core.views import inicio, usuarios, usuario_cadastro, usuario_edicao, usuario_remocao, turmas, turma_cadastro, atividades, atividade_cadastro, atividade, grupos, documentos, documento_cadastro
+
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home, name='inicio'),
+    path('', inicio, name='inicio'),
+    path('login/', auth_views.LoginView.as_view(), name='login'),
     path('usuarios/', usuarios, name='usuarios'),
     path('usuarios/cadastrar/', usuario_cadastro, name='usuario_cadastro'),
+    path('usuarios/editar/<int:id>', usuario_edicao, name='usuario_edicao'),
+    path('usuarios/apagar/<int:id>', usuario_remocao, name='usuario_remocao'),
     path('turmas/', turmas, name='turmas'),
     path('turmas/cadastrar/', turma_cadastro, name='turma_cadastro'),
     path('atividades/', atividades, name='atividades'),
