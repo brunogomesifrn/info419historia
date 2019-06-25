@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load static %}
+{% load widget_tweaks %}
 <html lang="pt-br">
 
 <head>
@@ -20,29 +21,27 @@
 </head>
 
 <body>
-
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top justify-content-between py-0">
-    <div class="container">
-      <a class="navbar-brand" href="{% url 'inicio' %}">História</a>
-      <button class="navbar-toggler border-0" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-        <i class="fas fa-bars"></i>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarResponsive">
-        <ul class="navbar-nav ml-auto my-0">
-          <li class="nav-item {% if current == 'inicio' %}active{% endif %}">
-            <a class="nav-link btn rounded-0" href="{% url 'inicio' %}">Início</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
   <!-- Page Content -->
   <div class="container mt-5">
     <div class="row">
-      {% block conteudo %}
-      {% endblock %}
+			<div class="col-lg-12 text-center pt-5">
+	    	<form class="w-25 mx-auto" method="POST">
+	    		{% csrf_token %}
+	    		{{form.non_field_errors}}
+					{% for field in form %}
+					<div class="control-group form-group">
+		        <div class="controls">
+		        	{{field.errors}}
+		          <label>{{field.label}}</label>
+		          {{field|add_class:'form-control'}}
+		          <p class="help-block"></p>
+		        </div>
+		      </div>
+					{% endfor %}
+					<p>Não possui uma conta? <a href="{% url 'registro' %}">Cadastre-se</a></p>
+	        <button type="submit" class="btn btn-primary">Login</button>
+	    	</form>
+    	</div>
     </div>
   </div>
   <!-- Bootstrap core JavaScript -->

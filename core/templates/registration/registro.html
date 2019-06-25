@@ -9,6 +9,7 @@
 						{% for field in form %}
 						<div class="control-group form-group">
 	            <div class="controls">
+	            	<div class="errors">{{field.errors}}</div>
 	              <label>{{field.label}}</label>
 	              {{field|add_class:'form-control'}}
 	              <p class="help-block"></p>
