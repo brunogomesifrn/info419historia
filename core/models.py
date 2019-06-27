@@ -2,6 +2,14 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+class Usuario(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    nome = models.CharField('Nome', max_length=100)
+    matricula = models.CharField('Matrícula', max_length=14)
+    email = models.EmailField('Email')
+    professor = models.BooleanField('Professor')
+
+
 class Turma(models.Model):
     nome = models.CharField('Nome', max_length=50)
     membros = models.ManyToManyField(User)
