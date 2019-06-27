@@ -10,16 +10,9 @@ from django.http import HttpResponse
 # Create your views here.
 
 
-def inicio(request):
-    contexto = {
-        'current': 'inicio'
-    }
-    return render(request, 'index.html', contexto)
-
-
 @login_required
 def perfil(request):
-    return render(request, 'perfil.html')
+  return render(request, 'perfil.html')
 
 
 @login_required
@@ -32,6 +25,16 @@ def usuarios(request):
 
 
 def registro(request):
+<<<<<<< HEAD
+  form = UsuarioForm(request.POST or None)
+  if form.is_valid():
+    form.save()
+    return redirect('login')
+  contexto = {
+      'form': form,
+  }
+  return render(request, 'registration/registro.html', contexto)
+=======
     form = UsuarioForm(request.POST or None)
     user_form = UserCreationForm(request.POST or None)
     if form.is_valid() and user_form.is_valid():
@@ -45,6 +48,7 @@ def registro(request):
         'user_form': user_form,
     }
     return render(request, 'registration/registro.html', contexto)
+>>>>>>> 783ec7c4ec958c9df97eb09d96f91851cff70bd0
 
 
 @login_required
