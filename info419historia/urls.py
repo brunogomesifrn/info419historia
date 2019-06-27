@@ -18,7 +18,7 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from core.views import (inicio, perfil, usuarios, registro,
+from core.views import (perfil, usuarios, registro,
                         usuario_edicao, usuario_remocao, turmas,
                         turma_cadastro, atividades, atividade_cadastro,
                         atividade, grupos, documentos, documento_cadastro)
@@ -27,16 +27,13 @@ from core.views import (inicio, perfil, usuarios, registro,
 urlpatterns = [
     path('admin/',
          admin.site.urls),
-    path('',
-         inicio,
-         name='inicio'),
     path('login/',
          auth_views.LoginView.as_view(),
          name='login'),
     path("logout/",
          auth_views.LogoutView.as_view(),
          name="logout"),
-    path('perfil/',
+    path('',
          perfil,
          name='perfil'),
     path('usuarios/',

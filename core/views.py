@@ -10,16 +10,9 @@ from django.http import HttpResponse
 # Create your views here.
 
 
-def inicio(request):
-    contexto = {
-        'current': 'inicio'
-    }
-    return render(request, 'index.html', contexto)
-
-
 @login_required
 def perfil(request):
-    return render(request, 'perfil.html')
+  return render(request, 'perfil.html')
 
 
 def usuarios(request):
@@ -31,14 +24,14 @@ def usuarios(request):
 
 
 def registro(request):
-    form = UsuarioForm(request.POST or None)
-    if form.is_valid():
-        form.save()
-        return redirect('login')
-    contexto = {
-        'form': form,
-    }
-    return render(request, 'registration/registro.html', contexto)
+  form = UsuarioForm(request.POST or None)
+  if form.is_valid():
+    form.save()
+    return redirect('login')
+  contexto = {
+      'form': form,
+  }
+  return render(request, 'registration/registro.html', contexto)
 
 
 @login_required

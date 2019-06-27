@@ -24,17 +24,20 @@
   <!-- Navigation -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top justify-content-between py-0">
     <div class="container">
-      <a class="navbar-brand" href="{% url 'inicio' %}">História</a>
+      <a class="navbar-brand" href="{% url 'perfil' %}">História</a>
       <button class="navbar-toggler border-0" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
         <i class="fas fa-bars"></i>
       </button>
       <div class="collapse navbar-collapse" id="navbarResponsive">
         <ul class="navbar-nav ml-auto my-0">
           <li class="nav-item {% if current == 'inicio' %}active{% endif %}">
-            <a class="nav-link btn rounded-0" href="{% url 'inicio' %}">Início</a>
+            <a class="nav-link btn rounded-0" href="{% url 'perfil' %}">Início</a>
           </li>
           <li class="nav-item bg-info">
             <a href="{% url 'perfil' %}" class="nav-link btn rounded-0 cursor-pointer">Área do usuário</a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'logout' %}" class="nav-link btn rounded-0 cursor-pointer">Sair</a>
           </li>
         </ul>
       </div>
@@ -45,6 +48,7 @@
   <div class="container mt-5">
     <div class="row">
       {% block conteudo %}
+
       {% endblock %}
     </div>
   </div>
