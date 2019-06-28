@@ -96,6 +96,7 @@ def atividades(request):
 
 
 @login_required
+<<<<<<< HEAD
 def atividade_cadastro(request):
     # Ação recebida pelo formulário
     acao = request.POST['acao'] if 'acao' in request.POST else ''
@@ -197,6 +198,8 @@ def atividade_cadastro(request):
 
 
 @login_required
+=======
+>>>>>>> a75c39420a1daf4858c3591e0e7fb64351449e1a
 def atividade(request, id):
     atividade = get_object_or_404(Atividade, pk=id)
     questoes = atividade.questao_set.all()
