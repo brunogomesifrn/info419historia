@@ -1,11 +1,13 @@
 {% extends 'base.html' %}
 
 {% block conteudo %}
-				<ul class="list-group">
-					{% for turma in turmas %}
-					<li class="list-group-item">{{turma}}</li>
-					{% empty %}
-					<li class="list-group-item">Nenhuma turma cadastrada</li>
-					{% endfor %}
-				</ul>
+				<div class="col-lg-12 text-center">
+					<ul class="list-group">
+						{% for turma in turmas %}
+						<li class="list-group-item">{{turma}}</li>
+						{% empty %}
+						<li class="list-group-item">Nenhuma turma cadastrada</li>
+						{% endfor %}
+					</ul>
+				</div>
 {% endblock %}

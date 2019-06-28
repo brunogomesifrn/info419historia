@@ -9,10 +9,13 @@ class Usuario(models.Model):
     email = models.EmailField('Email')
     professor = models.BooleanField('Professor')
 
+    def __str__(self):
+        return self.nome
+
 
 class Turma(models.Model):
     nome = models.CharField('Nome', max_length=50)
-    membros = models.ManyToManyField(User)
+    membros = models.ManyToManyField(Usuario)
 
     def __str__(self):
         return self.nome
@@ -30,9 +33,9 @@ class Atividade(models.Model):
 
 
 class Grupo(models.Model):
-    nota = models.IntegerField('Nota')
+    nota = models.IntegerField('Nota', null=True, blank=True)
     membros = models.ManyToManyField(
-        User, limit_choices_to={'professor': False})
+        Usuario, limit_choices_to={'professor': False})
     atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE)
 
 

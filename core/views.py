@@ -2,9 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
-from .forms import (UsuarioForm, TurmaForm, AtividadeForm,
+from .forms import (UsuarioForm, TurmaForm, AtividadeForm, GrupoForm,
                     TipoForm, DocumentoForm, QuestaoForm, AlternativaForm)
-from .models import Turma, Atividade, Grupo, Documento, Questao, Alternativa
+from .models import Usuario, Turma, Atividade, Grupo, Documento, Questao, Alternativa
 from django.http import HttpResponse
 
 # Create your views here.
@@ -12,12 +12,12 @@ from django.http import HttpResponse
 
 @login_required
 def perfil(request):
-  return render(request, 'perfil.html')
+    return render(request, 'perfil.html')
 
 
 @login_required
 def usuarios(request):
-    usuarios = User.objects.order_by('nome')
+    usuarios = Usuario.objects.order_by('nome')
     contexto = {
         'usuarios': usuarios,
     }
@@ -25,16 +25,6 @@ def usuarios(request):
 
 
 def registro(request):
-<<<<<<< HEAD
-  form = UsuarioForm(request.POST or None)
-  if form.is_valid():
-    form.save()
-    return redirect('login')
-  contexto = {
-      'form': form,
-  }
-  return render(request, 'registration/registro.html', contexto)
-=======
     form = UsuarioForm(request.POST or None)
     user_form = UserCreationForm(request.POST or None)
     if form.is_valid() and user_form.is_valid():
@@ -48,20 +38,24 @@ def registro(request):
         'user_form': user_form,
     }
     return render(request, 'registration/registro.html', contexto)
->>>>>>> 783ec7c4ec958c9df97eb09d96f91851cff70bd0
 
 
 @login_required
 def usuario_edicao(request, id):
-    usuario = get_object_or_404(User, pk=id)
+    usuario = get_object_or_404(Usuario, pk=id)
     form = UsuarioForm(request.POST or None, instance=usuario)
-    if form.is_valid():
-        form.save()
+    user_form = UserCreationForm(request.POST or None, instance=usuario.user)
+    if form.is_valid() and user_form.is_valid():
+        user = user_form.save()
+        usuario = form.save(commit=False)
+        usuario.user = user
+        usuario.save()
         return redirect('usuarios')
     contexto = {
-        'form': form
+        'form': form,
+        'user_form': user_form,
     }
-    return render(request, 'usuario_cadastro.html', contexto)
+    return render(request, 'registration/registro.html', contexto)
 
 
 @login_required
@@ -103,7 +97,7 @@ def atividades(request):
 
 @login_required
 def atividade_cadastro(request):
-        # Ação recebida pelo formulário
+    # Ação recebida pelo formulário
     acao = request.POST['acao'] if 'acao' in request.POST else ''
 
     atividade_form = AtividadeForm(
@@ -214,12 +208,32 @@ def atividade(request, id):
 
 
 @login_required
-def grupos(request):
-    grupos = Grupo.objects.all()
+def grupos(request, atividade_id):
+    atividade = get_object_or_404(Atividade, pk=atividade_id)
+    grupos = Grupo.objects.filter(atividade=atividade_id)
     contexto = {
         'grupos': grupos,
+        'atividade': atividade,
     }
     return render(request, 'grupos.html', contexto)
+
+
+@login_required
+def grupo_cadastro(request, atividade_id):
+    atividade = get_object_or_404(Atividade, pk=atividade_id)
+    form = GrupoForm(request.POST or None)
+    if form.is_valid():
+        grupo = form.save(commit=False)
+        grupo.atividade = atividade
+        grupo.save()
+        for item in form.data['membros']:
+            grupo.membros.add(item)
+        return redirect('grupos', atividade_id)
+    contexto = {
+        'form': form,
+        'atividade': atividade,
+    }
+    return render(request, 'grupo_cadastro.html', contexto)
 
 
 @login_required
