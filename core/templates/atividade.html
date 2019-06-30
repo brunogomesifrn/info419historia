@@ -3,6 +3,8 @@
 {% block conteudo %}
 				<div class="col-lg-12 text-center pt-5">
 					<h1>{{atividade}}</h1>
+					<a href="{% url 'atividade_edicao' atividade.id %}" class="btn btn-success">Editar</a>
+					<a href="{% url 'atividade_remocao' atividade.id %}" class="btn btn-danger">Remover</a>
 					{% for questao in questoes %}
 					<h3>{{forloop.counter}}. {{questao.comando}}</h3>
 					<ul class="list-group">

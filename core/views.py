@@ -133,7 +133,6 @@ def atividade_formulario(request,
                           if (default_quant_alternativas)
                           else ([2] * quant_questoes))
 
-    var = []
     # O laço vai de 1 à quantidade de questões
     for questao in range(1, quant_questoes + 1):
         if 'quant_alternativas-q%d' % questao in request.POST:
@@ -247,6 +246,14 @@ def atividade_edicao(request, id):
                                 default_quant_questoes=quant_questoes,
                                 default_quant_alternativas=quant_alternativas)
 
+
+@login_required
+def atividade_remocao(request, id):
+    atividade = get_object_or_404(Atividade, pk=id)
+
+    atividade.delete()
+
+    return redirect('perfil')
 #
 #
 # @login_required
