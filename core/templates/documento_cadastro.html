@@ -36,6 +36,8 @@
 {% block scripts %}
           <script type="text/javascript">
           	$(function(){
+              if ("{{acao}}" == "fechar")
+                close()
           		$arquivoDiv = $('input[name=arquivo]').parents('.form-group');
           		$textoDiv = $('textarea[name=texto]').parents('.form-group');
           		$arquivoDiv.hide();

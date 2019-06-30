@@ -4,3 +4,12 @@ body {
 
 .navbar {
 	background-color: #4F8E90;
+}
+
+.listagem {
+	background-color: #87CEFA;
+}
+
+.listagem .row {
+	width: 100%;
+}

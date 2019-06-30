@@ -23,7 +23,7 @@ from django.contrib.auth import views as auth_views
 #                         atividade_cadastro, atividade, grupos, grupo_cadastro,
 #                         documentos, documento_cadastro)
 from core.views import (perfil, usuarios, registro, usuario_edicao,
-                        usuario_remocao, turma_cadastro, atividades,
+                        usuario_remocao, turma_cadastro,
                         atividade_cadastro, atividade, atividade_edicao,
                         documentos, documento_cadastro)
 
@@ -55,9 +55,6 @@ urlpatterns = [
     path('turmas/cadastrar/',
          turma_cadastro,
          name='turma_cadastro'),
-    path('atividades/',
-         atividades,
-         name='atividades'),
     path('atividades/<int:id>/',
          atividade,
          name='atividade'),

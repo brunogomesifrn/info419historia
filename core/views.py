@@ -10,14 +10,17 @@ from .forms import (UsuarioForm, TurmaForm, AtividadeForm,
 from .models import Usuario, Turma, Atividade, Documento, Questao, Alternativa
 from django.http import HttpResponse
 
+
 # Create your views here.
 
 
 @login_required
 def perfil(request):
     turmas = Turma.objects.order_by('nome')
+    atividades = Atividade.objects.order_by('fim')
     contexto = {
         'turmas': turmas,
+        'atividades': atividades,
     }
     return render(request, 'registration/perfil.html', contexto)
 
@@ -91,15 +94,6 @@ def turma_cadastro(request):
         'form': form
     }
     return render(request, 'turma_cadastro.html', contexto)
-
-
-@login_required
-def atividades(request):
-    atividades = Atividade.objects.all()
-    contexto = {
-        'atividades': atividades,
-    }
-    return render(request, 'atividades.html', contexto)
 
 
 def atividade_formulario(request,
@@ -231,7 +225,7 @@ def atividade(request, id):
         'atividade': atividade,
         'questoes': questoes,
     }
-    return render(request, 'atividade.html', contexto)
+    return render(request, 'registration/perfil.html', contexto)
 
 
 @login_required
@@ -305,7 +299,7 @@ def documento_cadastro(request):
         form = DocumentoForm(data)
     if form.is_valid():
         form.save()
-        return redirect('atividade_cadastro')
+        return render(request, 'documento_cadastro.html', {'acao': 'fechar'})
     contexto = {
         'form': form,
         'tipo_form': tipo_form,
