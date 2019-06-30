@@ -7,19 +7,25 @@
 					<a href="{% url 'atividade_edicao' atividade.id %}" class="btn btn-success"><i class="fas fa-edit"></i></a>
 					<a href="{% url 'atividade_remocao' atividade.id %}" class="btn btn-danger"><i class="fas fa-trash"></i></a>
 					<p>Faltam {{atividade.fim|timeuntil}} para finalizar</p>
-					<h4>Peso: {{atividade.peso}}</h4>
+					<h5>Peso: {{atividade.peso}}</h5>
 					{% for questao in questoes %}
-					<h3>{{forloop.counter}}. {{questao.comando}}</h3>
-					<h4>Peso: {{questao.peso}}</h4>
+					<h4>{{forloop.counter}}. {{questao.comando}}</h4>
+					<h5>Peso: {{questao.peso}}</h5>
 					{% for documento in questao.documentos.all %}
-						<h3>Documento {{forloop.counter}}</h3>
-						{% if documento.arquivo  == '' %}
-							{{documento.texto}}
-						{% elif documento.arquivo|e_imagem %}
-							<img src="/media/{{documento.arquivo}}">
-						{% else %}
-							<a href="/media/{{documento.arquivo}}" class="btn btn-primary">Baixar documento</a>
-						{% endif %}
+						<div class= "listagem mb-4 p-4">
+							<h4>Documento {{forloop.counter}}</h4>
+							<h5>Título: {{documento.titulo}}</h5>
+							<h5>Origem: {{documento.origem}}</h5>
+							<h5>Créditos: {{documento.creditos}}</h5>
+							<h5>Tipo: {{documento.tipo}}</h5>
+							{% if documento.arquivo  == '' %}
+								{{documento.texto}}
+							{% elif documento.arquivo|e_imagem %}
+								<img src="/media/{{documento.arquivo}}" width="100%" height="auto">
+							{% else %}
+								<a href="/media/{{documento.arquivo}}" class="btn btn-primary">Baixar documento</a>
+							{% endif %}
+						</div>
 					{% endfor %}
 					
 					<ul class="list-group">
