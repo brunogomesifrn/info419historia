@@ -15,9 +15,19 @@ from django.http import HttpResponse
 
 @login_required
 def perfil(request):
-    return render(request, 'perfil.html')
+    turmas = Turma.objects.order_by('nome')
+    contexto = {
+        'turmas': turmas,
+    }
+    return render(request, 'registration/perfil.html', contexto)
 
-
+# @login_required
+# def turmas(request):
+#     turmas = Turma.objects.order_by('nome')
+#     contexto = {
+#         'turmas': turmas,
+#     }
+#     return render(request, 'turmas.html', contexto)
 @login_required
 def usuarios(request):
     usuarios = Usuario.objects.order_by('nome')
@@ -68,13 +78,7 @@ def usuario_remocao(request, id):
     return render(request, 'usuarios.html')
 
 
-@login_required
-def turmas(request):
-    turmas = Turma.objects.order_by('nome')
-    contexto = {
-        'turmas': turmas,
-    }
-    return render(request, 'turmas.html', contexto)
+
 
 
 @login_required
@@ -82,7 +86,7 @@ def turma_cadastro(request):
     form = TurmaForm(request.POST or None)
     if form.is_valid():
         form.save()
-        return redirect('turmas')
+        return redirect('perfil')
     contexto = {
         'form': form
     }
@@ -98,11 +102,17 @@ def atividades(request):
     return render(request, 'atividades.html', contexto)
 
 
+<<<<<<< HEAD
 def atividade_formulario(request,
                          default_quant_questoes=1,
                          default_quant_alternativas=None,
                          atividade=None):
 
+=======
+@login_required
+def atividade_cadastro(request):
+    # Ação recebida pelo formulário
+>>>>>>> 28250b068d447b3111d96a85c5babf2111aa89df
     acao = request.POST['acao'] if 'acao' in request.POST else ''
 
     atividade_form = AtividadeForm(request.POST or None,
@@ -216,11 +226,14 @@ def atividade_formulario(request,
 
 
 @login_required
+<<<<<<< HEAD
 def atividade_cadastro(request):
     return atividade_formulario(request)
 
 
 @login_required
+=======
+>>>>>>> 28250b068d447b3111d96a85c5babf2111aa89df
 def atividade(request, id):
     atividade = get_object_or_404(Atividade, pk=id)
     questoes = atividade.questao_set.all()
