@@ -12,9 +12,19 @@ from django.http import HttpResponse
 
 @login_required
 def perfil(request):
-    return render(request, 'perfil.html')
+    turmas = Turma.objects.order_by('nome')
+    contexto = {
+        'turmas': turmas,
+    }
+    return render(request, 'registration/perfil.html', contexto)
 
-
+# @login_required
+# def turmas(request):
+#     turmas = Turma.objects.order_by('nome')
+#     contexto = {
+#         'turmas': turmas,
+#     }
+#     return render(request, 'turmas.html', contexto)
 @login_required
 def usuarios(request):
     usuarios = Usuario.objects.order_by('nome')
@@ -65,13 +75,7 @@ def usuario_remocao(request, id):
     return render(request, 'usuarios.html')
 
 
-@login_required
-def turmas(request):
-    turmas = Turma.objects.order_by('nome')
-    contexto = {
-        'turmas': turmas,
-    }
-    return render(request, 'turmas.html', contexto)
+
 
 
 @login_required
@@ -79,7 +83,7 @@ def turma_cadastro(request):
     form = TurmaForm(request.POST or None)
     if form.is_valid():
         form.save()
-        return redirect('turmas')
+        return redirect('perfil')
     contexto = {
         'form': form
     }
@@ -96,7 +100,6 @@ def atividades(request):
 
 
 @login_required
-<<<<<<< HEAD
 def atividade_cadastro(request):
     # Ação recebida pelo formulário
     acao = request.POST['acao'] if 'acao' in request.POST else ''
@@ -198,8 +201,6 @@ def atividade_cadastro(request):
 
 
 @login_required
-=======
->>>>>>> a75c39420a1daf4858c3591e0e7fb64351449e1a
 def atividade(request, id):
     atividade = get_object_or_404(Atividade, pk=id)
     questoes = atividade.questao_set.all()

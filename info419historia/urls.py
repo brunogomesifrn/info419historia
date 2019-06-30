@@ -19,7 +19,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from core.views import (perfil, usuarios, registro, usuario_edicao,
-                        usuario_remocao, turmas, turma_cadastro, atividades,
+                        usuario_remocao, turma_cadastro, atividades,
                         atividade_cadastro, atividade, grupos, grupo_cadastro,
                         documentos, documento_cadastro)
 
@@ -48,9 +48,6 @@ urlpatterns = [
     path('usuarios/apagar/<int:id>',
          usuario_remocao,
          name='usuario_remocao'),
-    path('turmas/',
-         turmas,
-         name='turmas'),
     path('turmas/cadastrar/',
          turma_cadastro,
          name='turma_cadastro'),
