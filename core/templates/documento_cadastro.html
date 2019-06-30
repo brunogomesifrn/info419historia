@@ -5,7 +5,7 @@
 {% block conteudo %}
 				<div class="col-lg-12 text-center">
 					<h1 class="mt-5">Cadastrar novo documento</h1>
-					<form method="post">
+					<form method="post" enctype="multipart/form-data">
 						{% csrf_token %}
 						{% for field in form %}
 						<div class="control-group form-group">

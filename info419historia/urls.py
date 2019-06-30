@@ -18,9 +18,13 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+# from core.views import (perfil, usuarios, registro, usuario_edicao,
+#                         usuario_remocao, turmas, turma_cadastro, atividades,
+#                         atividade_cadastro, atividade, grupos, grupo_cadastro,
+#                         documentos, documento_cadastro)
 from core.views import (perfil, usuarios, registro, usuario_edicao,
                         usuario_remocao, turmas, turma_cadastro, atividades,
-                        atividade_cadastro, atividade, grupos, grupo_cadastro,
+                        atividade_cadastro, atividade, atividade_edicao,
                         documentos, documento_cadastro)
 
 
@@ -60,15 +64,18 @@ urlpatterns = [
     path('atividades/<int:id>/',
          atividade,
          name='atividade'),
-    path('atividades/<int:atividade_id>/grupos/',
-         grupos,
-         name='grupos'),
-    path('atividades/<int:atividade_id>/grupos/cadastrar/',
-         grupo_cadastro,
-         name='grupo_cadastro'),
+    # path('atividades/<int:atividade_id>/grupos/',
+    #      grupos,
+    #      name='grupos'),
+    # path('atividades/<int:atividade_id>/grupos/cadastrar/',
+    #      grupo_cadastro,
+    #      name='grupo_cadastro'),
     path('atividades/cadastrar/',
          atividade_cadastro,
          name='atividade_cadastro'),
+    path('atividades/<int:id>/editar/',
+         atividade_edicao,
+         name='atividade_edicao'),
     path('documentos/',
          documentos,
          name='documentos'),

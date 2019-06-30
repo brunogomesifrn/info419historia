@@ -9,17 +9,15 @@
 								<th>Nome</th>
 								<th>Matrícula</th>
 								<th>Email</th>
-								<th>Professor</th>
 								<th>Ações</th>
 							</tr>
 						</thead>
 						<tbody>
 						{% for usuario in usuarios %}
 						<tr>
-							<td>{{usuario.nome}}</td>
+							<td>{{usuario.nome}} {{usuario.sobrenome}}</td>
 							<td>{{usuario.matricula}}</td>
 							<td>{{usuario.email}}</td>
-							<td>{{usuario.professor|yesno:"Sim,Não"}}</td>
 							<td><a href="{% url 'usuario_edicao' usuario.id %}"><button class="btn btn-primary">Editar</button></a> <button class="btn btn-danger" data-toggle="modal" data-target="#confirmacao" data-nome="{{usuario.nome}}" data-url="{% url 'usuario_remocao' usuario.id %}">Apagar</button></td>
 						{% endfor %}
 						</tbody>

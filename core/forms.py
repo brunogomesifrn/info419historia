@@ -1,20 +1,22 @@
 from django import forms
 
-from .models import (Turma, Atividade, Grupo, Tipo,
+# from .models import (Turma, Atividade, Grupo, Tipo,
+#                      Usuario, Documento, Questao, Alternativa)
+from .models import (Turma, Atividade, Tipo,
                      Usuario, Documento, Questao, Alternativa)
 
 
 def get_proper_date_time_input():
     return forms.DateTimeInput(
         format='%d/%m/%Y %H:%M',
-        attrs={'placeholder': 'dd/mm/aaaa h:m'}
+        attrs={'placeholder': 'dd/mm/aaaa hr:min'}
     )
 
 
 class UsuarioForm(forms.ModelForm):
     class Meta:
         model = Usuario
-        fields = ['nome', 'matricula', 'email', 'professor']
+        fields = ['nome', 'sobrenome', 'matricula', 'email', 'professor']
 
 
 class TurmaForm(forms.ModelForm):
@@ -33,10 +35,10 @@ class AtividadeForm(forms.ModelForm):
         }
 
 
-class GrupoForm(forms.ModelForm):
-    class Meta:
-        model = Grupo
-        fields = ['membros']
+# class GrupoForm(forms.ModelForm):
+#     class Meta:
+#         model = Grupo
+#         fields = ['membros']
 
 
 class TipoForm(forms.ModelForm):

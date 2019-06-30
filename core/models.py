@@ -4,13 +4,14 @@ from django.contrib.auth.models import User
 
 class Usuario(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    nome = models.CharField('Nome', max_length=100)
+    nome = models.CharField('Nome', max_length=50)
+    sobrenome = models.CharField('Sobrenome', max_length=50)
     matricula = models.CharField('Matrícula', max_length=14)
     email = models.EmailField('Email')
     professor = models.BooleanField('Professor')
 
     def __str__(self):
-        return self.nome
+        return self.nome + ' ' + self.sobrenome
 
 
 class Turma(models.Model):
@@ -32,11 +33,11 @@ class Atividade(models.Model):
         return "Atividade - %s" % self.assunto
 
 
-class Grupo(models.Model):
-    nota = models.IntegerField('Nota', null=True, blank=True)
-    membros = models.ManyToManyField(
-        Usuario, limit_choices_to={'professor': False})
-    atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE)
+# class Grupo(models.Model):
+#     nota = models.IntegerField('Nota', null=True, blank=True)
+#     membros = models.ManyToManyField(
+#         Usuario, limit_choices_to={'professor': False})
+#     atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE)
 
 
 class Tipo(models.Model):
@@ -70,3 +71,6 @@ class Alternativa(models.Model):
     texto = models.TextField('Texto')
     peso = models.IntegerField('Peso')
     questao = models.ForeignKey(Questao, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.texto

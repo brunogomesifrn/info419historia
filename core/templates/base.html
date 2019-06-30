@@ -31,11 +31,8 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarResponsive">
         <ul class="navbar-nav ml-auto my-0">
-          <li class="nav-item {% if current == 'inicio' %}active{% endif %}">
-            <a class="nav-link btn rounded-0" href="{% url 'perfil' %}">Início</a>
-          </li>
           <li class="nav-item bg-info">
-            <a href="{% url 'perfil' %}" class="nav-link btn rounded-0 cursor-pointer">Área do usuário</a>
+            <a href="{% url 'perfil' %}" class="nav-link btn rounded-0 cursor-pointer">{{user.usuario.nome}}</a>
           </li>
           <li class="nav-item">
             <a href="{% url 'logout' %}" class="nav-link btn rounded-0 cursor-pointer">Sair</a>
