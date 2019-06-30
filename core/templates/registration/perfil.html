@@ -4,46 +4,44 @@
 
 				<div class="col-lg-12 pt-5">
 					<div class= "listagem mb-4 p-4">
-                        <div>
-    			  				<h2>Turmas</h2>
-    			  				<a href="{% url 'turma_cadastro' %}" class="btn btn-primary mb-4">Cadastrar nova Turma</a>
-    			  		</div>
-
-    			  		<div class="text-center">	
+						<div>
+							<h2>Turmas</h2>
+							<a href="{% url 'turma_cadastro' %}" class="btn btn-primary mb-4">Cadastrar nova Turma</a>
+						</div>
+						<div class="text-center">
 							<div class="row mx-0">
 								{% for turma in turmas %}
-					  				<div class="card col-xs-12 col-sm-12 col-md-6 col-lg-2 mt-4 mr-4">
-					      				<div class="card-body">
-					        				<h5 class="card-title">{{turma}}</h5>
-					        				<a href="{#}" class="btn btn-primary">Detalhes</a>
-					      				</div>
-					  				</div>
+								<div class="card col-xs-12 col-sm-12 col-md-6 col-lg-2 mt-4 mr-4">
+									<div class="card-body">
+										<h5 class="card-title">{{turma}}</h5>
+										<a href="#" class="btn btn-primary">Detalhes</a>
+									</div>
+								</div>
 								{% empty %}
-									<h5>Nenhuma turma cadastrada</h5>
+								<h5>Nenhuma turma cadastrada</h5>
 								{% endfor %}
-					  		</div>
-        				</div>
-                    </div>
-                    <div class= "listagem mb-4 p-4">
-                        <div>
-                                <h2>Atividades</h2>
-                                <a href="{% url 'atividade_cadastro' %}" class="btn btn-primary mb-4">Cadastrar nova Atividade</a>
-                        </div>
-
-                        <div class="text-center"> 
-                            <div class="row mx-0">
-                                {% for atividade in atividades %}
-                                    <div class="card col-xs-12 col-sm-12 col-md-6 col-lg-2 mt-4 mr-4">
-                                        <div class="card-body">
-                                            <h5 class="card-title">{{atividade}}</h5>
-                                            <a href="{#}" class="btn btn-primary">Detalhes</a>
-                                        </div>
-                                    </div>
-                                {% empty %}
-                                    <h5>Nenhuma atividade cadastrada</h5>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+							</div>
+						</div>
+					</div>
+					<div class= "listagem mb-4 p-4">
+						<div>
+							<h2>Atividades</h2>
+							<a href="{% url 'atividade_cadastro' %}" class="btn btn-primary mb-4">Cadastrar nova Atividade</a>
+						</div>
+						<div class="text-center">
+							<div class="row mx-0">
+								{% for atividade in atividades %}
+								<div class="card col-xs-12 col-sm-12 col-md-6 col-lg-2 mt-4 mr-4">
+									<div class="card-body">
+										<h5 class="card-title">{{atividade}}</h5>
+										<a href="#" class="btn btn-primary">Detalhes</a>
+									</div>
+								</div>
+								{% empty %}
+								<h5>Nenhuma atividade cadastrada</h5>
+								{% endfor %}
+							</div>
+						</div>
+					</div>
+				</div>
 {% endblock %}

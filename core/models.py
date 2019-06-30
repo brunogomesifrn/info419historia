@@ -30,7 +30,7 @@ class Atividade(models.Model):
     turmas = models.ManyToManyField(Turma)
 
     def __str__(self):
-        return "Atividade - %s" % self.assunto
+        return self.assunto
 
 
 # class Grupo(models.Model):

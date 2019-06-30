@@ -81,17 +81,17 @@ def usuario_remocao(request, id):
     return render(request, 'usuarios.html')
 
 
-
-
-
 @login_required
 def turma_cadastro(request):
     form = TurmaForm(request.POST or None)
+    acao = ""
     if form.is_valid():
         form.save()
-        return redirect('perfil')
+        form = TurmaForm()
+        acao = 'fechar'
     contexto = {
-        'form': form
+        'form': form,
+        'acao': acao,
     }
     return render(request, 'turma_cadastro.html', contexto)
 
