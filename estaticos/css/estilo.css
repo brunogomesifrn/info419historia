@@ -2,6 +2,18 @@ body {
 	background-color: #7FBEC0;
 }
 
+html, body {
+	height: 100%;
+}
+
+.footer {
+    width:100%;
+    height: 33px;
+    padding: 24px 0 5px 0;
+    text-align: center;
+    background-color: #4F8E90;
+}
+
 .navbar {
 	background-color: #4F8E90;
 }
