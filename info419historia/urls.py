@@ -25,7 +25,7 @@ from django.contrib.auth import views as auth_views
 from core.views import (perfil, usuarios, registro, usuario_edicao,
                         usuario_remocao, turma_cadastro,
                         atividade_cadastro, atividade, atividade_edicao,
-                        documentos, documento_cadastro)
+                        atividade_remocao, documentos, documento_cadastro)
 
 
 urlpatterns = [
@@ -70,6 +70,9 @@ urlpatterns = [
     path('atividades/<int:id>/editar/',
          atividade_edicao,
          name='atividade_edicao'),
+    path('atividades/<int:id>/remover',
+         atividade_remocao,
+         name='atividade_remocao'),
     path('documentos/',
          documentos,
          name='documentos'),
