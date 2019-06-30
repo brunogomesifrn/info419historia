@@ -105,6 +105,26 @@ def turma_cadastro(request):
     return render(request, 'turma_cadastro.html', contexto)
 
 
+@login_required
+def turma_edicao(request, id):
+    turma = get_object_or_404(Turma, pk=id)
+    turma.delete()
+    return redirect('perfil')
+
+
+@login_required
+def turma_remocao(request, id):
+    turma = get_object_or_404(Turma, pk=id)
+    form = TurmaForm(request.POST or None, instance=turma)
+    if form.is_valid():
+        form.save()
+        return redirect('turma', id)
+    contexto = {
+        'form': form,
+    }
+    return render(request, 'turma_cadastro.html', contexto)
+
+
 def atividade_formulario(request,
                          default_quant_questoes=1,
                          default_quant_alternativas=None,
