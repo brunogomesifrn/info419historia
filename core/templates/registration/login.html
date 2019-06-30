@@ -11,18 +11,23 @@
   <meta name="author" content="">
 
   <title>História</title>
+  <link rel="shortcut icon" href="{% static 'imagens/icone/historia.png' %}">
 
   <!-- Bootstrap core CSS -->
   <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/estilo.css' %}" rel="stylesheet">
   <script src="https://kit.fontawesome.com/46183de311.js"></script>
+
 
   <style type="text/css">
   </style>
 </head>
 
 <body>
+ 
   <!-- Page Content -->
   <div class="container mt-5">
+    <h1 class="text-center mb4">Login</h1>
     <div class="row">
 			<div class="col-lg-12 text-center pt-5">
 	    	<form class="w-25 mx-auto" method="POST">
@@ -38,7 +43,7 @@
 		        </div>
 		      </div>
 					{% endfor %}
-					<p>Não possui uma conta? <a href="{% url 'registro' %}">Cadastre-se</a></p>
+					<p>Não possui uma conta? <a href="{% url 'registro' %}" class="text-muted">Cadastre-se</a></p>
 	        <button type="submit" class="btn btn-primary">Login</button>
 	    	</form>
     	</div>

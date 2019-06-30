@@ -23,7 +23,7 @@ from django.contrib.auth import views as auth_views
 #                         atividade_cadastro, atividade, grupos, grupo_cadastro,
 #                         documentos, documento_cadastro)
 from core.views import (perfil, usuarios, registro, usuario_edicao,
-                        usuario_remocao, turma, turma_cadastro, turma_edicao, turma_remocao
+                        usuario_remocao, turma, turma_cadastro, turma_edicao, turma_remocao,
                         atividade_cadastro, atividade, atividade_edicao,
                         atividade_remocao, documentos, documento_cadastro)
 
