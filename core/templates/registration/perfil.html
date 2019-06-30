@@ -14,7 +14,7 @@
 								<div class="card col-xs-12 col-sm-12 col-md-6 col-lg-2 mt-4 mr-4">
 									<div class="card-body">
 										<h5 class="card-title">{{turma}}</h5>
-										<a href="#" class="btn btn-primary">Detalhes</a>
+										<a href="{% url 'turma' turma.id %}" class="btn btn-primary">Detalhes</a>
 									</div>
 								</div>
 								{% empty %}
@@ -34,7 +34,7 @@
 								<div class="card col-xs-12 col-sm-12 col-md-6 col-lg-2 mt-4 mr-4">
 									<div class="card-body">
 										<h5 class="card-title">{{atividade}}</h5>
-										<a href="#" class="btn btn-primary">Detalhes</a>
+										<a href="{% url 'atividade' atividade.id %}" class="btn btn-primary">Detalhes</a>
 									</div>
 								</div>
 								{% empty %}

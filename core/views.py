@@ -82,6 +82,15 @@ def usuario_remocao(request, id):
 
 
 @login_required
+def turma(request, id):
+    turma = get_object_or_404(Turma, pk=id)
+    contexto = {
+        'turma': turma,
+    }
+    return render(request, 'turma.html', contexto)
+
+
+@login_required
 def turma_cadastro(request):
     form = TurmaForm(request.POST or None)
     acao = ""
@@ -202,7 +211,7 @@ def atividade_formulario(request,
                 alternativa = alternativa_form.save(commit=False)
                 alternativa.questao = questao
                 alternativa.save()
-        return redirect('atividades')
+        return redirect('perfil')
     contexto = {
         'atividade_form': atividade_form,
         'questoes_forms': questoes_forms,
@@ -224,7 +233,7 @@ def atividade(request, id):
         'atividade': atividade,
         'questoes': questoes,
     }
-    return render(request, 'registration/perfil.html', contexto)
+    return render(request, 'atividade.html', contexto)
 
 
 @login_required
