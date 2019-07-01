@@ -1,6 +1,5 @@
 body {
 	background-color: #7FBEC0;
-	word-break: break-all;
 }
 
 html, body {
@@ -25,6 +24,7 @@ html, body {
 
 .texto {
 	background-color: #7FBEC0;
+    word-break: break-all;
 }
 
 .form-check label {
