@@ -17,7 +17,7 @@
 							<h5>Título: {{documento.titulo}}</h5>
 							{% if documento.arquivo  == '' %}
 								<div class="texto">
-									{{documento.texto}}
+									<p>{{documento.texto}}</p>
 								</div>
 							{% elif documento.arquivo|e_imagem %}
 								<img src="/media/{{documento.arquivo}}" width="100%" height="auto">

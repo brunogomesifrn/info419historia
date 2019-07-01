@@ -54,7 +54,7 @@ def registro(request):
     contexto = {
         'form': form,
         'user_form': user_form,
-        'titulo': 'cadastre-se',
+        'titulo': 'Cadastre-se',
     }
     return render(request, 'registration/registro.html', contexto)
 
@@ -239,7 +239,7 @@ def atividade_formulario(request,
                 alternativa = alternativa_form.save(commit=False)
                 alternativa.questao = questao
                 alternativa.save()
-        return redirect('perfil')
+        return redirect('atividade', atividade.id)
     contexto = {
         'atividade_form': atividade_form,
         'questoes_forms': questoes_forms,
