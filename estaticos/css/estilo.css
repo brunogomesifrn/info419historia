@@ -25,3 +25,11 @@ html, body {
 .texto {
 	background-color: #7FBEC0;
 }
+
+.form-check label {
+    margin-top: .25rem;
+}
+
+a, .btn-link {
+    color: #4433FF;
+}

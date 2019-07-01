@@ -1,60 +1,25 @@
-<!DOCTYPE html>
-{% load static %}
+{% extends "./base_registro.html" %}
 {% load widget_tweaks %}
-<html lang="pt-br">
 
-<head>
-
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="">
-  <meta name="author" content="">
-
-  <title>História</title>
-  <link rel="shortcut icon" href="{% static 'imagens/icone/historia.png' %}">
-
-  <!-- Bootstrap core CSS -->
-  <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
-  <link href="{% static 'css/estilo.css' %}" rel="stylesheet">
-  <script src="https://kit.fontawesome.com/46183de311.js"></script>
-
-
-  <style type="text/css">
-  </style>
-</head>
-
-<body>
- 
+{% block conteudo %}
   <!-- Page Content -->
-  <div class="container mt-5">
-    <h1 class="text-center mb4">Login</h1>
-    <div class="row">
-			<div class="col-lg-12 text-center pt-5">
-	    	<form class="w-25 mx-auto" method="POST">
-	    		{% csrf_token %}
-	    		{{form.non_field_errors}}
-					{% for field in form %}
-					<div class="control-group form-group">
-		        <div class="controls">
-		        	{{field.errors}}
-		          <label>{{field.label}}</label>
-		          {{field|add_class:'form-control'}}
-		          <p class="help-block"></p>
-		        </div>
-		      </div>
-					{% endfor %}
-					<p>Não possui uma conta? <a href="{% url 'registro' %}" class="text-muted">Cadastre-se</a></p>
-	        <button type="submit" class="btn btn-primary">Login</button>
-	    	</form>
-    	</div>
-    </div>
+  <div class="container text-center mt-5">
+    <h1 class="mb-4">Login</h1>
+  	<form class="w-25 mx-auto pt-5" method="POST">
+  		{% csrf_token %}
+  		{{form.non_field_errors}}
+			{% for field in form %}
+			<div class="control-group form-group">
+        <div class="controls">
+        	{{field.errors}}
+          <label>{{field.label}}</label>
+          {{field|add_class:'form-control'}}
+          <p class="help-block"></p>
+        </div>
+      </div>
+			{% endfor %}
+			<p>Não possui uma conta? <a href="{% url 'registro' %}">Cadastre-se</a></p>
+      <button type="submit" class="btn btn-primary">Login</button>
+    </form>
   </div>
-  <!-- Bootstrap core JavaScript -->
-  <script src="{% static 'jquery/jquery.slim.min.js' %}"></script>
-  <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
-  <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-  {% block scripts %}
-  {% endblock %}
-</body>
-
-</html>
+{% endblock %}

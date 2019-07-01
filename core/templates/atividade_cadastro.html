@@ -4,7 +4,7 @@
 
 {% block conteudo %}
 				<div class="col-lg-12 text-center pt-5">
-					<h1>Cadastrar nova atividade</h1>
+					<h1>{{titulo}}</h1>
 					<form method="post" class="w-75 mx-auto">
 						{% csrf_token %}
             {# O laço passa por todos os campos do formulário de atividade #}
@@ -13,11 +13,22 @@
 	            <div class="controls">
                 {{field.errors}}
 	              <label>{{field.label}}</label>
-                {{field|add_class:'form-control'}}
-                {# Se o campo for um "select", mostrar os links "atualiar" e "cadastrar nova" #}
-                {% if field.field.widget.input_type == 'select' %}
+                {# Se o campo for um "checkbox", mostrar os links "atualiar" e "cadastrar nova" #}
+                {% if field.field.widget.input_type == 'checkbox' %}
+                {% for checkbox in field %}
+                <div class="form-check bg-white rounded">
+                  {{checkbox}}
+                  {{checkbox.label}}
+                </div>
+                {% empty %}
+                <div class="form-check bg-white rounded">
+                  <label>Nenhuma turma cadastrada.</label>
+                </div>
+                {% endfor %}
                 <button type="submit" class="btn btn-link" name="acao" value="atualizar">Atualizar</button>
                 <a href="{% url 'turma_cadastro' %}" target="_blank">Cadastrar nova</a>
+                {% else %}
+                {{field|add_class:'form-control'}}
                 {% endif %}
 	              <p class="help-block"></p>
 	            </div>
@@ -35,10 +46,21 @@
               <div class="controls">
                 {{field.errors}}
                 <label>{{field.label}}</label>
-                {{field|add_class:'form-control'}}
-                {% if field.field.widget.input_type == 'select' %}
+                {% if field.field.widget.input_type == 'checkbox' %}
+                {% for checkbox in field %}
+                <div class="form-check bg-white rounded">
+                  {{checkbox}}
+                  {{checkbox.label}}
+                </div>
+                {% empty %}
+                <div class="form-check bg-white rounded">
+                  <label>Nenhum documento cadastrado.</label>
+                </div>
+                {% endfor %}
                 <button type="submit" class="btn btn-link" name="acao" value="atualizar">Atualizar</button>
                 <a href="{% url 'documento_cadastro' %}" target="_blank">Cadastrar novo</a>
+                {% else %}
+                {{field|add_class:'form-control'}}
                 {% endif %}
                 <p class="help-block"></p>
               </div>

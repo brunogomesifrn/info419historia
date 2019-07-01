@@ -52,6 +52,7 @@ def registro(request):
     contexto = {
         'form': form,
         'user_form': user_form,
+        'titulo': 'cadastre-se',
     }
     return render(request, 'registration/registro.html', contexto)
 
@@ -70,6 +71,7 @@ def usuario_edicao(request, id):
     contexto = {
         'form': form,
         'user_form': user_form,
+        'titulo': 'Editar usuário',
     }
     return render(request, 'registration/registro.html', contexto)
 
@@ -101,6 +103,7 @@ def turma_cadastro(request):
     contexto = {
         'form': form,
         'acao': acao,
+        'titulo': 'Cadastrar uma nova turma',
     }
     return render(request, 'turma_cadastro.html', contexto)
 
@@ -108,24 +111,26 @@ def turma_cadastro(request):
 @login_required
 def turma_edicao(request, id):
     turma = get_object_or_404(Turma, pk=id)
-    turma.delete()
-    return redirect('perfil')
-
-
-@login_required
-def turma_remocao(request, id):
-    turma = get_object_or_404(Turma, pk=id)
     form = TurmaForm(request.POST or None, instance=turma)
     if form.is_valid():
         form.save()
         return redirect('turma', id)
     contexto = {
         'form': form,
+        'titulo': 'Editar turma',
     }
     return render(request, 'turma_cadastro.html', contexto)
 
 
+@login_required
+def turma_remocao(request, id):
+    turma = get_object_or_404(Turma, pk=id)
+    turma.delete()
+    return redirect('perfil')
+
+
 def atividade_formulario(request,
+                         titulo,
                          default_quant_questoes=1,
                          default_quant_alternativas=None,
                          atividade=None):
@@ -236,13 +241,14 @@ def atividade_formulario(request,
         'atividade_form': atividade_form,
         'questoes_forms': questoes_forms,
         'alternativas_forms_questao': alternativas_forms_questao,
+        'titulo': titulo,
     }
     return render(request, 'atividade_cadastro.html', contexto)
 
 
 @login_required
 def atividade_cadastro(request):
-    return atividade_formulario(request)
+    return atividade_formulario(request, 'Cadastrar uma nova atividade')
 
 
 @login_required
@@ -265,6 +271,7 @@ def atividade_edicao(request, id):
                           for questao in atividade.questao_set.all()]
 
     return atividade_formulario(request,
+                                'Editar atividade',
                                 atividade=atividade,
                                 default_quant_questoes=quant_questoes,
                                 default_quant_alternativas=quant_alternativas)
@@ -273,9 +280,7 @@ def atividade_edicao(request, id):
 @login_required
 def atividade_remocao(request, id):
     atividade = get_object_or_404(Atividade, pk=id)
-
     atividade.delete()
-
     return redirect('perfil')
 #
 #

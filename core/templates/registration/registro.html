@@ -1,32 +1,32 @@
-{% extends 'base.html' %}
+{% extends './base_registro.html' %}
 {% load widget_tweaks %}
 
 {% block conteudo %}
-        <div class="col-lg-12 text-center pt-5">
-          <h1>Cadastre-se</h1>
-          <form method="post">
-            {% csrf_token %}
-            {% for field in form %}
-            <div class="control-group form-group">
-              <div class="controls">
-                <div class="errors">{{field.errors}}</div>
-                <label>{{field.label}}</label>
-                {{field|add_class:'form-control'}}
-                <p class="help-block"></p>
-              </div>
-            </div>
-            {% endfor %}
-            {% for field in user_form %}
-            <div class="control-group form-group">
-              <div class="controls">
-                {{field.errors}}
-                <label>{{field.label}}</label>
-                {{field|add_class:'form-control'}}
-                <p class="help-block"></p>
-              </div>
-            </div>
-            {% endfor %}
-            <button type="submit" class="btn btn-primary">Cadastrar</button>
-          </form>
+  <div class="container text-center mt-5">
+    <h1 class="mb-4">{{titulo}}</h1>
+    <form method="post" class="w-25 mx-auto pt-5">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="control-group form-group">
+        <div class="controls">
+          <div class="errors">{{field.errors}}</div>
+          <label>{{field.label}}</label>
+          {{field|add_class:'form-control'}}
+          <p class="help-block"></p>
         </div>
+      </div>
+      {% endfor %}
+      {% for field in user_form %}
+      <div class="control-group form-group">
+        <div class="controls">
+          {{field.errors}}
+          <label>{{field.label}}</label>
+          {{field|add_class:'form-control'}}
+          <p class="help-block"></p>
+        </div>
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary">Cadastrar</button>
+    </form>
+  </div>
 {% endblock %}
