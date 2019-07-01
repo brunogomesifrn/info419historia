@@ -31,6 +31,8 @@ def perfil(request):
 #         'turmas': turmas,
 #     }
 #     return render(request, 'turmas.html', contexto)
+
+
 @login_required
 def usuarios(request):
     usuarios = Usuario.objects.order_by('nome')
@@ -229,6 +231,7 @@ def atividade_formulario(request,
             questao = questao_form.save(commit=False)
             questao.atividade = atividade
             questao.save()
+            questao.documentos.clear()
             for documento in questao_form.cleaned_data['documentos']:
                 questao.documentos.add(documento)
 
