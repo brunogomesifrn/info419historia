@@ -12,19 +12,23 @@
 					<h4>{{forloop.counter}}. {{questao.comando}}</h4>
 					<h5>Peso: {{questao.peso}}</h5>
 					{% for documento in questao.documentos.all %}
-						<div class= "listagem mb-4 p-4">
+						<div class= "documento mb-4 p-4">
 							<h4>Documento {{forloop.counter}}</h4>
 							<h5>Título: {{documento.titulo}}</h5>
-							<h5>Origem: {{documento.origem}}</h5>
-							<h5>Créditos: {{documento.creditos}}</h5>
-							<h5>Tipo: {{documento.tipo}}</h5>
 							{% if documento.arquivo  == '' %}
-								{{documento.texto}}
+								<div class="texto">{{documento.texto}}
+								</div>
 							{% elif documento.arquivo|e_imagem %}
 								<img src="/media/{{documento.arquivo}}" width="100%" height="auto">
 							{% else %}
 								<a href="/media/{{documento.arquivo}}" class="btn btn-primary">Baixar documento</a>
 							{% endif %}
+							<div class="text-left legenda">
+								<h4>Legenda:</h4>
+								<p>Origem: {{documento.origem}}<br />
+								Créditos: {{documento.creditos}}<br />
+								Tipo: {{documento.tipo}}</p>
+							</div>
 						</div>
 					{% endfor %}
 					
