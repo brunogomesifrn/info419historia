@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 {% load static %}
 <html lang="pt-br">
-
 <head>
-
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="">
@@ -22,7 +20,6 @@
 </head>
 
 <body>
-
   <!-- Navigation -->
   <nav class="navbar navbar-expand-lg navbar-dark fixed-top justify-content-between py-0">
     <div class="container">
@@ -33,7 +30,7 @@
       <div class="collapse navbar-collapse" id="navbarResponsive">
         <ul class="navbar-nav ml-auto my-0">
           <li class="nav-item bg-info">
-            <a href="{% url 'perfil' %}" class="nav-link btn rounded-0 cursor-pointer">{{user.usuario.nome}}</a>
+            <a href="{% url 'perfil' %}" class="nav-link btn rounded-0 cursor-pointer">{{user.nome}}</a>
           </li>
           <li class="nav-item">
             <a href="{% url 'logout' %}" class="nav-link btn rounded-0 cursor-pointer">Sair</a>
@@ -55,16 +52,16 @@
       <h2 class="">Criadores:</h2>
       <div class="row">
         <div class="col-md-4 col-12 border-right">
-            <img class="rounded-circle" src="{% static 'imagens/equipe/Lari.jpg' %}" width="40%" height="auto">
-            <p class="text-white">Larissa Andressa Pereira Silva</p>
+          <img class="rounded-circle" src="{% static 'imagens/equipe/Lari.jpg' %}" width="40%" height="auto">
+          <p class="text-white">Larissa Andressa Pereira Silva</p>
         </div>
         <div class="col-md-4 col-12 border-right">
-          <span class="rounded-circle mb-3"><img class="rounded-circle" src="{% static 'imagens/equipe/Davi.jpg' %}" width="40%" height="auto"></span>
-            <p class="text-white">José Davi Viana Francelino</p>
+          <img class="rounded-circle" src="{% static 'imagens/equipe/Davi.jpg' %}" width="40%" height="auto">
+          <p class="text-white">José Davi Viana Francelino</p>
         </div>
         <div class="col-md-4 col-12 border-right">
-          <span class="rounded-circle mb-3"><img class="rounded-circle" src="{% static 'imagens/equipe/Vivi.jpg' %}" width="40%" height="auto"></span>
-            <p class="text-white">Vivianny Caroline Félix Bezerra</p>
+          <img class="rounded-circle" src="{% static 'imagens/equipe/Vivi.jpg' %}" width="40%" height="auto">
+          <p class="text-white">Vivianny Caroline Félix Bezerra</p>
         </div>
       </div>
     </div>
@@ -76,5 +73,4 @@
   {% block scripts %}
   {% endblock %}
 </body>
-
 </html>

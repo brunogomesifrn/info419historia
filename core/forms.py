@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 # from .models import (Turma, Atividade, Grupo, Tipo,
 #                      Usuario, Documento, Questao, Alternativa)
@@ -13,10 +14,36 @@ def get_proper_date_time_input():
     )
 
 
-class UsuarioForm(forms.ModelForm):
+class UsuarioCriacaoForm(UserCreationForm):
     class Meta:
         model = Usuario
-        fields = ['nome', 'sobrenome', 'matricula', 'email', 'professor']
+        fields = ('nome',
+                  'sobrenome',
+                  'matricula',
+                  'professor',
+                  'email',)
+
+
+class UsuarioEdicaoForm(UserChangeForm):
+    """docstring for UsuarioEdicaoForm"""
+    class Meta:
+        model = Usuario
+        fields = ('nome',
+                  'sobrenome',
+                  'matricula',
+                  'professor',
+                  'email',)
+
+# class UsuarioForm(forms.ModelForm):
+#     class Meta:
+#         model = Usuario
+#         fields = ['email', 'password1', 'password2']
+
+
+# class PerfilForm(forms.ModelForm):
+#     class Meta:
+#         model = Perfil
+#         fields = ['nome', 'sobrenome', 'matricula', 'professor']
 
 
 class TurmaForm(forms.ModelForm):

@@ -1,16 +1,14 @@
 {% extends 'base.html' %}
 
 {% block conteudo %}
-				<div class="col-lg-12 text-center pt-5">
-
-	        <a href="{% url 'atividade_cadastro' %}"><button class="btn btn-primary">Cadastrar</button></a>
-					<ul class="list-group">
-						{% for atividade in atividades %}
-						<li class="list-group-item"><a href="{% url 'atividade' atividade.id %}">{{atividade}}</a></li>
-						{% empty %}
-						<li class="list-group-item">Nenhuma atividade cadastrada</li>
-						{% endfor %}
-					</ul>
-				</div>
-				
+  <div class="col-lg-12 text-center pt-5">
+    <a href="{% url 'atividade_cadastro' %}"><button class="btn btn-primary">Cadastrar</button></a>
+    <ul class="list-group">
+      {% for atividade in atividades %}
+        <li class="list-group-item"><a href="{% url 'atividade' atividade.id %}">{{atividade}}</a></li>
+      {% empty %}
+        <li class="list-group-item">Nenhuma atividade cadastrada</li>
+      {% endfor %}
+    </ul>
+  </div>
 {% endblock %}

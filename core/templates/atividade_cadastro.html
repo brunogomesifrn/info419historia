@@ -18,7 +18,7 @@
             {% for erro in field.errors %}
               <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
             {% endfor %}
-            {# Se o campo for um "checkbox", mostrar os links "atualiar" e "cadastrar nova" #}
+            {# Se o campo for um "checkbox", imprimir cada item e mostrar os links "atualiar" e "cadastrar nova" #}
             {% if field.field.widget.input_type == 'checkbox' %}
               {% for checkbox in field %}
                 <div class="form-check bg-white rounded">
@@ -56,6 +56,7 @@
                 {% for erro in field.errors %}
                   <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
                 {% endfor %}
+                {# Se o campo for um "checkbox", imprimir cada item e mostrar os links "atualiar" e "cadastrar novo" #}
                 {% if field.field.widget.input_type == 'checkbox' %}
                   {% for checkbox in field %}
                     <div class="form-check bg-white rounded">
@@ -76,7 +77,7 @@
               </div>
             </div>
           {% endfor %}
-          {# "index" permite recuperar o valor da lista numa certa posição. "forloop.counter0" armazena a quantidade de vezes que o laço foi executado, começando do 0. Assim, a variável "alternativas_forms" vai guardar o valor numa certa posição de "alternativas_forms_questao" #}
+          {# "index" permite recuperar o valor da lista numa certa posição. "forloop.counter0" armazena a quantidade de vezes que o laço foi executado, começando do 0. Assim, a variável "alternativas_forms" vai guardar o valor guardado numa certa posição de "alternativas_forms_questao" #}
           {% with alternativas_forms=alternativas_forms_questao|index:forloop.counter0 %}
             {% for alternativa_form in alternativas_forms %}
               <h4>Alternativa {{forloop.counter}}</h6>
@@ -96,7 +97,7 @@
                 </div>
               {% endfor %}
             {% endfor %}
-            {# É utilizado um input escondido para armazenar o númeor de alternativas atual e poder enviar de volta para views.py #}
+            {# É utilizado um input escondido para armazenar o número de alternativas atual e poder enviar de volta para views.py #}
             <input type="hidden" name="quant_alternativas-q{{n}}" class="form-control" value="{{alternativas_forms|length}}" required />
             <button type="submit" class="btn btn-outline-success btn-sm my-2" name="acao" value="nova_alternativa-q{{n}}">Adicionar alternativa</button>
             <button type="submit" class="btn btn-outline-danger btn-sm my-2" name="acao" value="remover_alternativa-q{{n}}">Remover alternativa</button><br/>
@@ -114,7 +115,7 @@
 {% block scripts %}
   <script type="text/javascript">
     $(function(e) {
-      {# Sempre um botão que tenha "name=acao", um novo input será criado e enviará para views.py a ação que deverá acontecer. Por exemplo, adicionar uma nova questão ou salvar ou dados. #}
+      {# Sempre um botão que tenha "name=acao" for clicado, um novo input será criado e enviará para views.py a ação que deverá acontecer. Por exemplo, adicionar uma nova questão ou salvar ou dados. #}
       $('button[name=acao]').click(function(){
         $('form').append(
           $('<input[type=hidden]>')
@@ -122,7 +123,6 @@
             .val($(this).val())
         )
       });
-
 
       {# A função "able_disable" testa se todos os inputs, textareas e selects possuem algum valor. Se não, o botão "salvar" será desativado #}
       var $salvar_btn = $('button[value="salvar"]');
@@ -142,10 +142,11 @@
       {# Se houver 1 questão ou menos, o botão "remover questão" será desativado #}
       if ($('input[name=quant_questoes]').val() <= 1)
         $('button[value=remover_questao]').prop('disabled', true);
+
       {# Se houver 2 alternativas ou menos, o botão "remover alternativa" correspondente será desativado #}
       {% for n in questoes_forms|length|trange %}
-      if ($('input[name=quant_alternativas-q{{n}}]').val() <= 2)
-        $('button[value=remover_alternativa-q{{n}}]').prop('disabled', true);
+        if ($('input[name=quant_alternativas-q{{n}}]').val() <= 2)
+          $('button[value=remover_alternativa-q{{n}}]').prop('disabled', true);
       {% endfor %}
     });
   </script>

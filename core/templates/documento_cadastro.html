@@ -14,7 +14,7 @@
   			<div class="control-group form-group">
           <div class="controls">
             <label>{{field.label}}</label>
-            {% for erro in fields.errors¨%}
+            {% for erro in fields.errors %}
               <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
             {% endfor %}
             {{field|add_class:'form-control'}}

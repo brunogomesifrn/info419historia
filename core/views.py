@@ -4,8 +4,9 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 # from .forms import (UsuarioForm, TurmaForm, AtividadeForm, GrupoForm,
 #                     TipoForm, DocumentoForm, QuestaoForm, AlternativaForm)
-from .forms import (UsuarioForm, TurmaForm, AtividadeForm,
-                    TipoForm, DocumentoForm, QuestaoForm, AlternativaForm)
+from .forms import (UsuarioCriacaoForm, UsuarioEdicaoForm, TurmaForm,
+                    AtividadeForm, TipoForm, DocumentoForm, QuestaoForm,
+                    AlternativaForm)
 # from .models import Usuario, Turma, Atividade, Grupo, Documento, Questao, Alternativa
 from .models import Usuario, Turma, Atividade, Documento, Questao, Alternativa
 from django.http import HttpResponse
@@ -43,17 +44,12 @@ def usuarios(request):
 
 
 def registro(request):
-    form = UsuarioForm(request.POST or None)
-    user_form = UserCreationForm(request.POST or None)
-    if form.is_valid() and user_form.is_valid():
-        user = user_form.save()
-        usuario = form.save(commit=False)
-        usuario.user = user
-        usuario.save()
+    form = UsuarioCriacaoForm(request.POST or None)
+    if form.is_valid():
+        form.save()
         return redirect('login')
     contexto = {
         'form': form,
-        'user_form': user_form,
         'titulo': 'Cadastre-se',
     }
     return render(request, 'registration/registro.html', contexto)
@@ -62,18 +58,20 @@ def registro(request):
 @login_required
 def usuario_edicao(request, id):
     usuario = get_object_or_404(Usuario, pk=id)
-    form = UsuarioForm(request.POST or None, instance=usuario)
-    user_form = UserCreationForm(request.POST or None, instance=usuario.user)
-    if form.is_valid() and user_form.is_valid():
-        user = user_form.save()
-        usuario = form.save(commit=False)
-        usuario.user = user
-        usuario.save()
+    form = UsuarioEdicaoForm(request.POST or None, instance=usuario)
+    # user_form = UserCreationForm(request.POST or None, instance=usuario.user)
+    # if form.is_valid() and user_form.is_valid():
+    if form.is_valid():
+        # user = user_form.save()
+        # usuario = form.save(commit=False)
+        # usuario.user = user
+        # usuario.save()
+        form.save()
         return redirect('usuarios')
     contexto = {
         'form': form,
-        'user_form': user_form,
-        'titulo': 'Editar usuário',
+        # 'user_form': user_form,
+        'titulo': 'Editar %s' % usuario,
     }
     return render(request, 'registration/registro.html', contexto)
 

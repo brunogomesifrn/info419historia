@@ -7,33 +7,18 @@
     <form method="post" class="w-25 mx-auto pt-5">
       {% csrf_token %}
       {% for erro in form.non_field_errors %}
-      	<div class="alert alert-danger" role="alert">{{erro|escape}}</div>
+        <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
       {% endfor %}
       {% for field in form %}
-	      <div class="control-group form-group">
-	        <div class="controls">
-	          <label>{{field.label}}</label>
-			      {% for erro in field.errors %}
-			      	<div class="alert alert-danger" role="alert">{{erro|escape}}</div>
-			      {% endfor %}
-			      {{field|add_class:'form-control'}}
-	        </div>
-	      </div>
-      {% endfor %}
-      {% for erro in user_form.non_field_errors %}
-      	<div class="alert alert-danger" role="alert">{{erro|escape}}</div>
-      {% endfor %}
-      {% for field in user_form %}
-	      <div class="control-group form-group">
-	        <div class="controls">
-			      {% for erro in field.errors %}
-			      	<div class="alert alert-danger" role="alert">{{erro|escape}}</div>
-			      {% endfor %}
-	          <label>{{field.label}}</label>
-	          {{field|add_class:'form-control'}}
-	          <p class="help-block"></p>
-	        </div>
-	      </div>
+          <div class="control-group form-group">
+            <div class="controls">
+              <label>{{field.label}}</label>
+              {% for erro in field.errors %}
+                <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
+              {% endfor %}
+              {{field|add_class:'form-control'}}
+            </div>
+          </div>
       {% endfor %}
       <button type="submit" class="btn btn-primary">Cadastrar</button>
     </form>
