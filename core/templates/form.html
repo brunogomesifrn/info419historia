@@ -1,0 +1,54 @@
+{% load core_extras %}
+{% load widget_tweaks %}
+
+{% csrf_token %}
+{% for erro in form.non_field_errors %}
+  <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
+{% endfor %}
+{% for field in form %}
+	<div class="control-group form-group">
+    <div class="controls">
+      {{field.label_tag}}
+      {% for erro in field.errors %}
+        <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
+      {% endfor %}
+      {% if field.field.widget.input_type == 'checkbox' %}
+        {% with tipo=field.field.widget %}
+          {% for checkbox in field %}
+            <div class="form-control">
+              {{checkbox}}
+              {{checkbox.label}}
+            </div>
+          {% empty %}
+            <div class="form-control">
+              Nenhum{{tipo.genero|masc_fem:''}} {{tipo.nome}} cadastrad{{tipo.genero|masc_fem}}
+            </div>
+          {% endfor %}
+          {% if tipo.nome != 'usuario' %}
+            <button type="submit" class="btn btn-link" name="acao" value="atualizar">Atualizar</button>
+            <button type="button" class="btn btn-link" name='abrir_cadastro' value="{% url tipo.nome|add:'_cadastro' %}">Cadastrar outr{{tipo.genero|masc_fem}} {{tipo.nome}}</button>
+          {% endif %}
+        {% endwith %}
+      {% else %}
+        {{field|add_class:'form-control'}}
+      {% endif %}
+      <p class="help-block"></p>
+      <!--div class="modal fade" id="confirmacao" tabindex="-1" role="dialog" aria-labelledby="title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="title">Deseja atualizar a página?</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-success" data-dismiss="modal">Sim</button>
+              <button type='button' class='btn btn-danger' onclick="window.close()">Não</button>
+            </div>
+          </div>
+        </div>
+      </div-->
+    </div>
+  </div>
+{% endfor %}

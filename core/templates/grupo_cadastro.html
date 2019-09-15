@@ -3,18 +3,9 @@
 
 {% block conteudo %}
   <div class="col-12 text-center">
-    <h1 class="mt-5">Cadastrar novo grupo para a atividade sobre {{atividade}}</h1>
+    <h1 class="mt-5">{{titulo}}</h1>
     <form method="post">
-      {% csrf_token %}
-      {% for field in form %}
-        <div class="control-group form-group">
-          <div class="controls">
-            <label>{{field.label}}</label>
-            {{field|add_class:'form-control'}}
-            <p class="help-block"></p>
-          </div>
-        </div>
-      {% endfor %}
+      {% include 'form.html' with form=form only %}
       <button type="submit" class="btn btn-primary">Salvar</button>
     </form>
   </div>

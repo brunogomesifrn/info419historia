@@ -7,39 +7,8 @@
 		<h1 class="mt-5">Cadastrar novo documento</h1>
 		<form method="post" enctype="multipart/form-data" class="w-75 mx-auto">
 			{% csrf_token %}
-      {% for erro in form.non_field_errors %}
-        <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
-      {% endfor %}
-			{% for field in form %}
-  			<div class="control-group form-group">
-          <div class="controls">
-            <label>{{field.label}}</label>
-            {% for erro in fields.errors %}
-              <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
-            {% endfor %}
-            {{field|add_class:'form-control'}}
-            {% if field.name == 'tipo' %}
-              <p><input class="my-2" type="checkbox" name="novo" /> Novo</p>
-            {% endif %}
-            <p class="help-block"></p>
-          </div>
-        </div>
-			{% endfor %}
-      {% for erro in tipo_form.non_field_errors %}
-        <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
-      {% endfor %}
-      {% for field in tipo_form %}
-        <div class="control-group form-group">
-          <div class="controls">
-            <label>{{field.label}}</label>
-            {% for erro in field.errors %}
-              <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
-            {% endfor %}
-            {{field|add_class:'form-control'}}
-            <p class="help-block"></p>
-          </div>
-        </div>
-      {% endfor %}
+      {% include 'form.html' with form=form only %}
+      {% include 'form.html' with form=tipo_form only %}
       <button type="submit" class="btn btn-primary">Salvar</button>
 		</form>
 	</div>
@@ -50,9 +19,9 @@
   	$(function(){
       if ("{{acao}}" == "fechar")
         close()
-  		$arquivoDiv = $('input[name=arquivo]').parents('.form-group');
-  		$textoDiv = $('textarea[name=texto]').parents('.form-group');
-  		$arquivoDiv.hide();
+
+  		const $arquivoDiv = $('input[name=arquivo]').parents('.form-group').hide(),
+            $textoDiv = $('textarea[name=texto]').parents('.form-group');
   		$('<div class="control-group form-group">')
 				.append($('<div class="controls">')
 					.append($('<label>O documento será composto por um:</label>'))
@@ -61,8 +30,7 @@
 							$('<option value=0 selected>Texto</option>'),
 							$('<option value=1>Arquivo</option>')
 						).change(function(){
-							$this = $(this);
-							if ($this.val() == '0') {
+							if ($(this).val() == '0') {
 								$textoDiv.show();
 								$arquivoDiv.hide();
 							}
@@ -72,18 +40,16 @@
 							}
 						}))
 				).insertBefore($textoDiv);
-        $tipoDiv = $('select[name=tipo]').parents('.form-group');
-        $nomeDiv = $('input[name=nome]').parents('.form-group');
-        $nomeDiv.hide()
-        $('input[name=novo]').change(function() {
-          if ($(this).is(':checked')) {
+
+        const $tipo = $('select[name=tipo]'),
+              $tipoDiv = $tipo.parents('.form-group'),
+              $nomeDiv = $('input[name=nome]').parents('.form-group').hide(),
+              $novo = $('<option value="novo">Novo</option>');
+
+        $tipo.append($novo).change(function() {
+          if ($tipo.val() == 'novo') {
             $tipoDiv.hide()
             $nomeDiv.show()
-            $('input[name=novo]').parent().insertAfter($('input[name=nome]'))
-          } else {
-            $tipoDiv.show()
-            $nomeDiv.hide()
-            $('input[name=novo]').parent().insertAfter($('select[name=tipo]'))
           }
         })
   	});

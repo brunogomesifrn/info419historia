@@ -5,32 +5,8 @@
   <div class="col-lg-12 text-center">
     <h1 class="mt-5">{{titulo}}</h1>
     <form method="post" class="w-75 mx-auto">
-      {% csrf_token %}
-      {% for erro in form.non_field_errors %}
-        <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
-      {% endfor %}
-      {% for field in form %}
-        <div class="control-group form-group">
-          <div class="controls">
-            <label>{{field.label}}</label>
-            {% for erro in fields.errors %}
-              <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
-            {% endfor %}
-            {% if field.field.widget.input_type == 'checkbox' %}
-              {% for checkbox in field %}
-                <div class="form-check bg-white rounded">
-                  {{checkbox}}
-                  {{checkbox.label}}
-                </div>
-              {% endfor %}
-            {% else %}
-              {{field|add_class:'form-control'}}
-            {% endif %}
-            <p class="help-block"></p>
-          </div>
-        </div>
-      {% endfor %}
-      <button type="submit" class="btn btn-primary">Salvar</button>
+      {% include 'form.html' with form=form only %}
+      <button type="submit" class="btn btn-primary" value="salvar">Salvar</button>
     </form>
   </div>
   <div class="modal fade" id="confirmacao" tabindex="-1" role="dialog" aria-labelledby="title" aria-hidden="true">
@@ -52,6 +28,7 @@
 {% endblock %}
 
 {% block scripts %}
+  {{block.super}}
   <script type="text/javascript">
     $(function(){
       if ("{{acao}}" == "fechar")

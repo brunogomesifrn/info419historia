@@ -5,24 +5,10 @@
   <!-- Page Content -->
   <div class="container text-center mt-5">
     <h1 class="mb-4">Login</h1>
-  	<form class="w-25 mx-auto pt-5" method="POST">
+    <form class="w-25 mx-auto pt-5" method="POST">
       {% csrf_token %}
-      {% for erro in form.non_field_errors %}
-      	<div class="alert alert-danger" role="alert">{{erro|escape}}</div>
-      {% endfor %}
-  		{% for field in form %}
-  			<div class="control-group form-group">
-          <div class="controls">
-            <label>{{field.label}}</label>
-            {% for erro in field.errors %}
-            	<div class="alert alert-danger" role="alert">{{erro|escape}}</div>
-            {% endfor %}
-            {{field|add_class:'form-control'}}
-            <p class="help-block"></p>
-          </div>
-        </div>
-  		{% endfor %}
-  		<p>Não possui uma conta? <a href="{% url 'registro' %}">Cadastre-se</a></p>
+      {% include 'form.html' with form=form only %}
+      <p>Não possui uma conta? <a href="{% url 'registro' %}">Cadastre-se</a></p>
       <button type="submit" class="btn btn-primary">Login</button>
     </form>
   </div>
