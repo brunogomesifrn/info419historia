@@ -18,14 +18,7 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-# from core.views import (perfil, usuarios, registro, usuario_edicao,
-#                         usuario_remocao, turmas, turma_cadastro, atividades,
-#                         atividade_cadastro, atividade, grupos, grupo_cadastro,
-#                         documentos, documento_cadastro)
-from core.views import (perfil, usuarios, registro, usuario_edicao,
-                        usuario_remocao, turma, turma_cadastro, turma_edicao, turma_remocao,
-                        atividade_cadastro, atividade, atividade_edicao,
-                        atividade_remocao, documentos, documento_cadastro)
+from core.views import *
 
 
 urlpatterns = [
@@ -46,10 +39,10 @@ urlpatterns = [
     path('usuarios/cadastrar/',
          registro,
          name='registro'),
-    path('usuarios/editar/<int:id>',
+    path('usuarios/editar/<int:id>/',
          usuario_edicao,
          name='usuario_edicao'),
-    path('usuarios/apagar/<int:id>',
+    path('usuarios/apagar/<int:id>/',
          usuario_remocao,
          name='usuario_remocao'),
     path('turmas/cadastrar/',
@@ -67,12 +60,18 @@ urlpatterns = [
     path('atividades/<int:id>/',
          atividade,
          name='atividade'),
-    # path('atividades/<int:atividade_id>/grupos/',
-    #      grupos,
-    #      name='grupos'),
-    # path('atividades/<int:atividade_id>/grupos/cadastrar/',
-    #      grupo_cadastro,
-    #      name='grupo_cadastro'),
+    path('atividades/<int:atividade_id>/grupos/',
+         grupos,
+         name='grupos'),
+    path('atividades/<int:atividade_id>/grupos/cadastrar/',
+         grupo_cadastro,
+         name='grupo_cadastro'),
+    path('grupos/<int:id>/editar/',
+         grupo_edicao,
+         name='grupo_edicao'),
+    path('grupos/<int:id>/ápagar/',
+         grupo_remocao,
+         name='grupo_remocao'),
     path('atividades/cadastrar/',
          atividade_cadastro,
          name='atividade_cadastro'),

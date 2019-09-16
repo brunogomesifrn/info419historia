@@ -1,7 +1,6 @@
 {% load core_extras %}
 {% load widget_tweaks %}
 
-{% csrf_token %}
 {% for erro in form.non_field_errors %}
   <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
 {% endfor %}
@@ -12,10 +11,10 @@
       {% for erro in field.errors %}
         <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
       {% endfor %}
-      {% if field.field.widget.input_type == 'checkbox' %}
-        {% with tipo=field.field.widget %}
+      {% with tipo=field.field.widget %}
+        {% if tipo.input_type == 'checkbox' or tipo.input_type == 'radio' %}
           {% for checkbox in field %}
-            <div class="form-control">
+            <div class="{% firstof custum_radio_class 'form-control' %}">
               {{checkbox}}
               {{checkbox.label}}
             </div>
@@ -24,14 +23,14 @@
               Nenhum{{tipo.genero|masc_fem:''}} {{tipo.nome}} cadastrad{{tipo.genero|masc_fem}}
             </div>
           {% endfor %}
-          {% if tipo.nome != 'usuario' %}
+          {% if not tipo.nome|startswith:'usuario' %}
             <button type="submit" class="btn btn-link" name="acao" value="atualizar">Atualizar</button>
             <button type="button" class="btn btn-link" name='abrir_cadastro' value="{% url tipo.nome|add:'_cadastro' %}">Cadastrar outr{{tipo.genero|masc_fem}} {{tipo.nome}}</button>
           {% endif %}
-        {% endwith %}
-      {% else %}
-        {{field|add_class:'form-control'}}
-      {% endif %}
+        {% else %}
+          {{field|add_class:'form-control'}}
+        {% endif %}
+      {% endwith %}
       <p class="help-block"></p>
       <!--div class="modal fade" id="confirmacao" tabindex="-1" role="dialog" aria-labelledby="title" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load core_extras %}
+
+{% block conteudo %}
+  <div class="col-lg-12 text-center p-5">
+    <h1>{{atividade}}</h1>
+    <p><i class="far fa-clock"></i> {{atividade.fim|timeuntil|to_list|first}}</p>
+    <form method="post" class="mx-auto">
+      {% csrf_token %}
+      {% for form in forms %}
+        <div class="questao">
+          <h4>Questão {{forloop.counter}}. {{form.resposta.questao.comando}}</h4>
+          {% for documento in form.resposta.questao.documentos.all %}
+            {% include 'documento.html' with documento=documento n=forloop.counter only %}
+          {% endfor %}
+          {% include 'form.html' with form=form custum_radio_class='alternativa' only %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-success my-2" name='acao' value='enviar'>Enviar</button>
+      <button type="submit" class="btn btn-primary my-2" name='acao' value='salvar'>Salvar</button>
+    </form>
+  </div>
+{% endblock %}

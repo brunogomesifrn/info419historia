@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.contrib.auth.models import Permission
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -43,8 +44,7 @@ class Usuario(AbstractUser):
     nome = models.CharField('Nome', max_length=50)
     email = models.EmailField('Email', unique=True)
     sobrenome = models.CharField('Sobrenome', max_length=50)
-    matricula = models.CharField('Matrícula', max_length=14)
-    professor = models.BooleanField('Professor')
+    matricula = models.CharField('Matrícula', max_length=14, unique=True)
 
     USERNAME_FIELD = 'email'  # Define o campo usado na autenticação
     REQUIRED_FIELDS = []
@@ -52,18 +52,13 @@ class Usuario(AbstractUser):
     objects = UserManager()
 
     def __str__(self):
-        return self.nome + ' ' + self.sobrenome
+        return self.nome + ' ' + self.sobrenome + ' (' + self.matricula + ')'
 
+    def get_genero():
+        return 'm'
 
-# class Perfil(models.Model):
-#     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
-#     nome = models.CharField('Nome', max_length=50)
-#     sobrenome = models.CharField('Sobrenome', max_length=50)
-#     matricula = models.CharField('Matrícula', max_length=14)
-#     professor = models.BooleanField('Professor')
-
-#     def __str__(self):
-#         return self.nome + ' ' + self.sobrenome
+    def is_professor(self):
+        return self.groups.filter(name__startswith="P").exists()
 
 
 class Turma(models.Model):
@@ -85,11 +80,10 @@ class Atividade(models.Model):
         return self.assunto
 
 
-# class Grupo(models.Model):
-#     nota = models.IntegerField('Nota', null=True, blank=True)
-#     membros = models.ManyToManyField(
-#         Usuario, limit_choices_to={'professor': False})
-#     atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE)
+class Grupo(models.Model):
+    nota = models.IntegerField('Nota', null=True, blank=True)
+    membros = models.ManyToManyField(Usuario)
+    atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE)
 
 
 class Tipo(models.Model):
@@ -126,3 +120,18 @@ class Alternativa(models.Model):
 
     def __str__(self):
         return self.texto
+
+
+class Resposta(models.Model):
+    grupo = models.ForeignKey(Grupo, on_delete=models.CASCADE)
+    questao = models.ForeignKey(Questao, on_delete=models.CASCADE)
+    escolha = models.ForeignKey(Alternativa,
+                                on_delete=models.PROTECT,
+                                limit_choices_to={
+                                    'questao': models.F('questao')
+                                },
+                                null=True)
+    enviada = models.BooleanField('Enviada', default=False)
+
+    class Meta:
+        unique_together = ('grupo', 'questao')

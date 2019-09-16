@@ -5,6 +5,7 @@
   <div class="col-12 text-center">
     <h1 class="mt-5">{{titulo}}</h1>
     <form method="post">
+      {% csrf_token %}
       {% include 'form.html' with form=form only %}
       <button type="submit" class="btn btn-primary">Salvar</button>
     </form>

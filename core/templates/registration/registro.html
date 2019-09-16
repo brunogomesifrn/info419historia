@@ -32,6 +32,7 @@
       </div>
     {% endif %}
     <form method="post" class="w-25 mx-auto pt-5">
+      {% csrf_token %}
       {% include 'form.html' with form=form only %}
       <button type="submit" class="btn btn-primary">Cadastrar</button>
     </form>

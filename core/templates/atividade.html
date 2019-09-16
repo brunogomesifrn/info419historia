@@ -3,47 +3,33 @@
 
 {% block conteudo %}
   <div class="col-lg-12 text-center pt-5">
-    <h1>{{atividade}}</h1>
+    <h1><span>{{atividade}}</span></h1>
     <a href="{% url 'atividade_edicao' atividade.id %}" class="btn btn-success"><i class="fas fa-edit"></i></a>
     <a href="{% url 'atividade_remocao' atividade.id %}" class="btn btn-danger"><i class="fas fa-trash"></i></a>
-    <p>Faltam {{atividade.fim|timeuntil}} para finalizar</p>
-    <h5>Peso: {{atividade.peso}}</h5>
-    {% for questao in questoes %}
-      <h4>{{forloop.counter}}. {{questao.comando}}</h4>
-      <h5>Peso: {{questao.peso}}</h5>
-      {% for documento in questao.documentos.all %}
-        <div class= "documento mb-4 p-4">
-          <h4>Documento {{forloop.counter}}</h4>
-          <h5>Título: {{documento.titulo}}</h5>
-          {% if documento.arquivo  == '' %}
-            <div class="texto">
-              <p>{{documento.texto}}</p>
-            </div>
-          {% elif documento.arquivo|e_imagem %}
-            <img src="/media/{{documento.arquivo}}" width="100%" height="auto">
-          {% else %}
-            <a href="/media/{{documento.arquivo}}" class="btn btn-primary">Baixar documento</a>
-          {% endif %}
-          <div class="text-left legenda">
-            <h4>Legenda:</h4>
-            <p>Origem: {{documento.origem}}<br />
-            Créditos: {{documento.creditos}}<br />
-            Tipo: {{documento.tipo}}</p>
-          </div>
-        </div>
-      {% endfor %}
-      <ul class="list-group">
+    <h5><span>Peso: {{atividade.peso}}</span></h5>
+    <p><i class="far fa-clock"></i> {{atividade.fim|timeuntil|to_list|first}}</p>
+    {% for questao in atividade.questao_set.all %}
+      <div class="questao">
+        <h4><span>Questão {{forloop.counter}}. {{questao.comando}}</span></h4>
+        <h5><span>Peso: {{questao.peso}}</span></h5>
+        {% for documento in questao.documentos.all %}
+          {% include 'documento.html' with documento=documento n=forloop.counter only %}
+        {% endfor %}
+        <h5><span>Alternativas</span></h5>
         {% for alternativa in questao.alternativa_set.all %}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div class="alternativa d-flex justify-content-between align-items-center">
             {{alternativa.texto}}
-            <span class="badge badge-primary badge-pill">{{alternativa.peso}}</span>
-          </li>
+            <div class="align-items-end">
+              <span class="badge badge-pill peso">{{alternativa.peso}}</span>
+              <span class="badge">sd</span>
+            </div>
+          </div>
         {% empty %}
           <li class="list-group-item">Nenhuma alternativa cadastrada</li>
         {% endfor %}
-      </ul>
+      </div>
     {% empty %}
-      <h3 class="mt-5">Nenhuma questão cadastrada</h3>
+      <h3><span>class="mt-5">Nenhuma questão cadastrada</span></h3>
     {% endfor %}
   </div>
 {% endblock %}

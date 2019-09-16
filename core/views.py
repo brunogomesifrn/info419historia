@@ -1,15 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.decorators import login_required
-# from .forms import (UsuarioForm, TurmaForm, AtividadeForm, GrupoForm,
-#                     TipoForm, DocumentoForm, QuestaoForm, AlternativaForm)
-from .forms import (UsuarioCriacaoForm, UsuarioEdicaoForm, TurmaForm,
-                    AtividadeForm, TipoForm, DocumentoForm, QuestaoForm,
-                    AlternativaForm)
-# from .models import Usuario, Turma, Atividade, Grupo, Documento, Questao, Alternativa
-from .models import Usuario, Turma, Atividade, Documento, Questao, Alternativa
-from django.http import HttpResponse
+from django.contrib.auth.models import User, Group
+# from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required, permission_required
+from .forms import *
+from .models import (Usuario, Turma, Atividade, Alternativa, Grupo,
+                     Documento, Resposta)
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 
 
 # Create your views here.
@@ -35,6 +31,7 @@ def perfil(request):
 
 
 @login_required
+@permission_required('core.view_usuario', raise_exception=True)
 def usuarios(request):
     usuarios = Usuario.objects.order_by('nome')
     contexto = {
@@ -58,32 +55,39 @@ def registro(request):
 @login_required
 def usuario_edicao(request, id):
     usuario = get_object_or_404(Usuario, pk=id)
+    atual = request.user
+    if not atual.has_perm('core.change_usuario') and usuario != atual:
+        raise PermissionDenied
+    if 'permissoes' in request.POST:
+        if not atual.has_perm('auth.change_permission'):
+            raise PermissionDenied
+        if request.POST['permissoes'] == '1':
+            usuario.groups.set([Group.objects.get(name__startswith="P")])
+        else:
+            usuario.groups.set([Group.objects.get(name__startswith="A")])
+        return redirect('usuarios')
     form = UsuarioEdicaoForm(request.POST or None, instance=usuario)
-    # user_form = UserCreationForm(request.POST or None, instance=usuario.user)
-    # if form.is_valid() and user_form.is_valid():
     if form.is_valid():
-        # user = user_form.save()
-        # usuario = form.save(commit=False)
-        # usuario.user = user
-        # usuario.save()
         form.save()
         return redirect('usuarios')
     contexto = {
         'form': form,
-        # 'user_form': user_form,
         'titulo': 'Editar %s' % usuario,
+        'usuario': usuario,
     }
     return render(request, 'registration/registro.html', contexto)
 
 
 @login_required
+@permission_required('core.delete_usuario', raise_exception=True)
 def usuario_remocao(request, id):
-    usuario = get_object_or_404(User, pk=id)
+    usuario = get_object_or_404(Usuario, pk=id)
     usuario.delete()
     return render(request, 'usuarios.html')
 
 
 @login_required
+@permission_required('core.view_turma', raise_exception=True)
 def turma(request, id):
     turma = get_object_or_404(Turma, pk=id)
     contexto = {
@@ -93,6 +97,7 @@ def turma(request, id):
 
 
 @login_required
+@permission_required('core.add_turma', raise_exception=True)
 def turma_cadastro(request):
     form = TurmaForm(request.POST or None)
     acao = ""
@@ -109,6 +114,7 @@ def turma_cadastro(request):
 
 
 @login_required
+@permission_required('core.change_turma', raise_exception=True)
 def turma_edicao(request, id):
     turma = get_object_or_404(Turma, pk=id)
     form = TurmaForm(request.POST or None, instance=turma)
@@ -117,12 +123,13 @@ def turma_edicao(request, id):
         return redirect('turma', id)
     contexto = {
         'form': form,
-        'titulo': 'Editar turma',
+        'titulo': 'Editar turma %s' % turma,
     }
     return render(request, 'turma_cadastro.html', contexto)
 
 
 @login_required
+@permission_required('core.delete_turma', raise_exception=True)
 def turma_remocao(request, id):
     turma = get_object_or_404(Turma, pk=id)
     turma.delete()
@@ -139,6 +146,9 @@ def atividade_formulario(request,
     atividade_form = AtividadeForm(request.POST or None,
                                    use_required_attribute=False,
                                    instance=atividade)
+    if acao != 'salvar':
+        for field in atividade_form.fields:
+            atividade_form.errors[field] = atividade_form.error_class()
 
     # A quantidade de questões, inicialmente, é um, mas pode mudar
     # de acordo com o valor recebido pelo formulário e se a ação for
@@ -188,10 +198,14 @@ def atividade_formulario(request,
         # "questoes_forms". O parâmetro "prefix" serve pata nomear cada
         # formulário e evitar que os dados sejam misturados. As questões são
         # nomeadas "questao1", "questao2", ...
-        questoes_forms.append(QuestaoForm(request.POST or None,
-                                          prefix="questao%d" % n,
-                                          use_required_attribute=False,
-                                          instance=questao))
+        questao_form = QuestaoForm(request.POST or None,
+                                   prefix="questao%d" % n,
+                                   use_required_attribute=False,
+                                   instance=questao)
+        questoes_forms.append(questao_form)
+        if acao != 'salvar':
+            for field in questao_form.fields:
+                questao_form.errors[field] = questao_form.error_class()
         # Essa lista armazenará somente os formulários as alternativas da mesma
         # questão
         alternativas_forms = []
@@ -204,23 +218,25 @@ def atividade_formulario(request,
             # Arzenados os formulários das alternativas com o prefix
             # "alternativa1-q1", "alternativa2-q1", ...,
             # "alternativa1-q2", "alternativa2-q2", ...
-            alternativas_forms.append(AlternativaForm(
+            alternativa_form = AlternativaForm(
                 request.POST or None,
                 prefix="alternativa%d-q%d" % (m, n),
                 use_required_attribute=False,
-                instance=alternativa))
+                instance=alternativa)
+            alternativas_forms.append(alternativa_form)
+            if acao != 'salvar':
+                for field in alternativa_form.fields:
+                    alternativa_form.errors[field] = alternativa_form.error_class()
         # Armazenada as listas na outra
         alternativas_forms_questao.append(alternativas_forms)
 
-    if acao == 'salvar':
-        valido = (atividade_form.is_valid() and
-                  all([questao_form.is_valid()
-                       for questao_form in questoes_forms]) and
-                  all([alternativa_form.is_valid()
-                       for alternativa_form in alternativas_forms
-                       for alternativas_forms in alternativas_forms_questao]))
-    else:
-        valido = False
+    valido = (acao == 'salvar' and
+              atividade_form.is_valid() and
+              all([questao_form.is_valid()
+                   for questao_form in questoes_forms]) and
+              all([alternativa_form.is_valid()
+                   for alternativa_form in alternativas_forms
+                   for alternativas_forms in alternativas_forms_questao]))
     if valido:
         atividade = atividade_form.save()
         for questao_form, alternativas_forms in zip(
@@ -229,9 +245,7 @@ def atividade_formulario(request,
             questao = questao_form.save(commit=False)
             questao.atividade = atividade
             questao.save()
-            questao.documentos.clear()
-            for documento in questao_form.cleaned_data['documentos']:
-                questao.documentos.add(documento)
+            questao_form.save_m2m()
 
             for alternativa_form in alternativas_forms:
                 alternativa = alternativa_form.save(commit=False)
@@ -248,25 +262,56 @@ def atividade_formulario(request,
 
 
 @login_required
+@permission_required('core.add_atividade', raise_exception=True)
+@permission_required('core.add_questao', raise_exception=True)
+@permission_required('core.add_alternativa', raise_exception=True)
 def atividade_cadastro(request):
     return atividade_formulario(request, 'Cadastrar uma nova atividade')
 
 
 @login_required
+@permission_required('core.view_atividade', raise_exception=True)
+@permission_required('core.view_questao', raise_exception=True)
+@permission_required('core.view_alternativa', raise_exception=True)
 def atividade(request, id):
     atividade = get_object_or_404(Atividade, pk=id)
-    questoes = atividade.questao_set.all()
     contexto = {
         'atividade': atividade,
-        'questoes': questoes,
     }
-    return render(request, 'atividade.html', contexto)
+    if request.user.is_professor():
+        return render(request, 'atividade.html', contexto)
+
+    try:
+        grupo = request.user.grupo_set.get(atividade=atividade)
+    except ObjectDoesNotExist:
+        return redirect('grupo_cadastro', id)
+
+    forms = []
+    for n, questao in enumerate(atividade.questao_set.all(), start=1):
+        resposta, criada = Resposta.objects.get_or_create(grupo=grupo,
+                                                          questao=questao)
+        forms.append(RespostaForm(resposta,
+                                  request.POST or None,
+                                  prefix="questao%s" % n,
+                                  use_required_attribute=False))
+
+    if 'acao' in request.POST:
+        acao = request.POST['acao']
+        if acao == 'salvar' or acao == 'enviar':
+            for form in forms:
+                if form.is_valid():
+                    form.save(enviar=(acao == 'enviar'))
+
+    contexto['forms'] = forms
+    return render(request, 'atividade_responder.html', contexto)
 
 
 @login_required
+@permission_required('core.change_atividade', raise_exception=True)
+@permission_required('core.change_questao', raise_exception=True)
+@permission_required('core.change_alternativa', raise_exception=True)
 def atividade_edicao(request, id):
     atividade = get_object_or_404(Atividade, pk=id)
-
     quant_questoes = atividade.questao_set.count()
     quant_alternativas = [questao.alternativa_set.count()
                           for questao in atividade.questao_set.all()]
@@ -279,42 +324,72 @@ def atividade_edicao(request, id):
 
 
 @login_required
+@permission_required('core.delete_atividade', raise_exception=True)
+@permission_required('core.delete_questao', raise_exception=True)
+@permission_required('core.delete_alternativa', raise_exception=True)
 def atividade_remocao(request, id):
     atividade = get_object_or_404(Atividade, pk=id)
     atividade.delete()
     return redirect('perfil')
-#
-#
-# @login_required
-# def grupos(request, atividade_id):
-#     atividade = get_object_or_404(Atividade, pk=atividade_id)
-#     grupos = Grupo.objects.filter(atividade=atividade_id)
-#     contexto = {
-#         'grupos': grupos,
-#         'atividade': atividade,
-#     }
-#     return render(request, 'grupos.html', contexto)
-#
-#
-# @login_required
-# def grupo_cadastro(request, atividade_id):
-#     atividade = get_object_or_404(Atividade, pk=atividade_id)
-#     form = GrupoForm(request.POST or None)
-#     if form.is_valid():
-#         grupo = form.save(commit=False)
-#         grupo.atividade = atividade
-#         grupo.save()
-#         for item in form.data['membros']:
-#             grupo.membros.add(item)
-#         return redirect('grupos', atividade_id)
-#     contexto = {
-#         'form': form,
-#         'atividade': atividade,
-#     }
-#     return render(request, 'grupo_cadastro.html', contexto)
 
 
 @login_required
+@permission_required('core.view_grupo', raise_exception=True)
+def grupos(request, atividade_id):
+    atividade = get_object_or_404(Atividade, pk=atividade_id)
+    grupos = Grupo.objects.filter(atividade__id=atividade_id)
+    sem_grupo = Usuario.objects.filter(groups__name__startswith="A",
+                                       grupo__isnull=True)
+    contexto = {
+        'grupos': grupos,
+        'titulo': "Grupos da atividade %s" % atividade,
+        'sem_grupo': sem_grupo,
+    }
+    return render(request, 'grupos.html', contexto)
+
+
+@login_required
+@permission_required('core.add_grupo', raise_exception=True)
+def grupo_cadastro(request, atividade_id):
+    atividade = get_object_or_404(Atividade, pk=atividade_id)
+    form = GrupoCriacaoForm(atividade, request.POST or None)
+    if form.is_valid():
+        form.save()
+        return redirect('grupos', atividade_id)
+    contexto = {
+        'form': form,
+        'titulo': "Cadastro de grupo para a atividade \"%s\"" % atividade,
+    }
+    return render(request, 'grupo_cadastro.html', contexto)
+
+
+@login_required
+@permission_required('core.change_grupo', raise_exception=True)
+def grupo_edicao(request, id):
+    grupo = get_object_or_404(Grupo, pk=id)
+    form = GrupoEdicaoForm(request.POST or None, instance=grupo)
+    if form.is_valid():
+        form.save()
+        return redirect('grupos', grupo.atividade.id)
+    contexto = {
+        'form': form,
+        'titulo': "Edição de grupo para a atividade \"%s\"" % grupo.atividade,
+    }
+    return render(request, 'grupo_cadastro.html', contexto)
+
+
+@login_required
+@permission_required('core.delete_grupo', raise_exception=True)
+def grupo_remocao(request, id):
+    grupo = get_object_or_404(Grupo, pk=id)
+    atividade_id = grupo.atividade.id
+    grupo.delete()
+    return redirect('grupos', atividade_id)
+
+
+@login_required
+@permission_required('core.view_documento', raise_exception=True)
+@permission_required('core.view_tipo', raise_exception=True)
 def documentos(request):
     documentos = Documento.objects.all()
     contexto = {
@@ -324,6 +399,8 @@ def documentos(request):
 
 
 @login_required
+@permission_required('core.add_documento', raise_exception=True)
+@permission_required('core.add_tipo', raise_exception=True)
 def documento_cadastro(request):
     if 'composicao' in request.POST:
         composicao = request.POST['composicao']
@@ -332,7 +409,8 @@ def documento_cadastro(request):
         elif composicao == 1:
             request.POST['texto'] = None
     form = DocumentoForm(request.POST or None,
-                         request.FILES or None, use_required_attribute=False)
+                         request.FILES or None,
+                         use_required_attribute=False)
     tipo_form = TipoForm(request.POST or None, use_required_attribute=False)
     if tipo_form.is_valid():
         tipo = tipo_form.save()

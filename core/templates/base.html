@@ -43,8 +43,10 @@
   <!-- Page Content -->
   <div class="container mt-5">
     <div class="row">
-      {% block conteudo %}
-      {% endblock %}
+      {% spaceless %}
+        {% block conteudo %}
+        {% endblock %}
+      {% endspaceless %}
     </div>
   </div>
   <footer class="footer mt-5 text-center">
@@ -52,15 +54,15 @@
       <h2 class="">Criadores:</h2>
       <div class="row">
         <div class="col-md-4 col-12 border-right">
-          <img class="rounded-circle" src="{% static 'imagens/equipe/Lari.jpg' %}" width="40%" height="auto">
+          <img class="rounded-circle" src="{% static 'imagens/equipe/Lari.jpg' %}" width="30%" height="auto">
           <p class="text-white">Larissa Andressa Pereira Silva</p>
         </div>
         <div class="col-md-4 col-12 border-right">
-          <img class="rounded-circle" src="{% static 'imagens/equipe/Davi.jpg' %}" width="40%" height="auto">
+          <img class="rounded-circle" src="{% static 'imagens/equipe/Davi.jpg' %}" width="30%" height="auto">
           <p class="text-white">José Davi Viana Francelino</p>
         </div>
         <div class="col-md-4 col-12 border-right">
-          <img class="rounded-circle" src="{% static 'imagens/equipe/Vivi.jpg' %}" width="40%" height="auto">
+          <img class="rounded-circle" src="{% static 'imagens/equipe/Vivi.jpg' %}" width="30%" height="auto">
           <p class="text-white">Vivianny Caroline Félix Bezerra</p>
         </div>
       </div>
@@ -68,9 +70,52 @@
   </footer>
   <!-- Bootstrap core JavaScript -->
   <script src="{% static 'jquery/jquery.slim.min.js' %}"></script>
+  <script src="{% static 'jquery/jquery.cookie.js' %}"></script>
   <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
-  <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-  {% block scripts %}
+  <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>  {% block scripts %}
+  <script type="text/javascript">
+    $((e) => {
+      {# Sempre um botão que tenha "name=acao" for clicado, um novo input será criado e enviará para views.py a ação que deverá acontecer. Por exemplo, adicionar uma nova questão ou salvar ou dados. #}
+      $('button[name=acao]').click(() => {
+        $('form').append(
+          $('<input[type=hidden]>')
+            .attr('name', 'acao')
+            .val($(this).val())
+        )
+        return true;
+      });
+      $('button[name=abrir_cadastro]').click((e) => {
+        $button = $(e.target);
+        window.open($button.val());
+      });
+
+      $('input[type=radio]:checked').parents('.form-control, .alternativa').addClass('selected')
+      $('input[type=radio]:checked:disabled').parents('.form-control, .alternativa').addClass('sent')
+      $('input[type=radio], input[type=checkbox]').change((e) => {
+        $(e.target).parents('.form-control, .alternativa').addClass('selected')
+          .siblings('.selected').removeClass('selected')
+      }).parents('.form-control, .alternativa').each((i, el) => {
+        $(el).click((e) => {
+          if (e.target !== el)
+            return;
+          $input = $(e.target).find('input');
+          if ($input.is(':disabled'))
+            return;
+          if ($input.is(':checkbox')) {
+            checked = $input.is(':checked');
+            $input.prop('checked', !checked);
+          } else {
+            name = $input.attr('name');
+            $('input[name='+name+']:checked')
+              .prop('checked', false)
+            $input
+              .prop('checked', true)
+              .change();
+          }
+        });
+      });
+    });
+  </script>
   {% endblock %}
 </body>
 </html>

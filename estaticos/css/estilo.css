@@ -18,13 +18,40 @@ html, body {
 	background-color: #87CEFA;
 }
 
-.documento {
-	background-color: #87CECA;
+.questao {
+    padding: 7%;
+    margin-bottom: 2rem;
+	background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 1rem;
 }
 
-.texto {
-	background-color: #7FBEC0;
+.documento {
+	background-color: #b4fe97;
+    border-radius: 1rem;
+	-moz-box-shadow: 5px 5px 5px rgba(68,68,68,0.6);
+	-webkit-box-shadow: 5px 5px 5px rgba(68,68,68,0.6);
+	box-shadow: 5px 5px 5px rgba(68,68,68,0.6);
+}
+
+.documento .texto {
+	background-color: #8ed7a1;
     word-break: break-all;
+    border-radius: 1rem;
+}
+
+.alternativa {
+	background-color: #ffffcd;
+	margin-bottom: 0.8rem;
+	padding: 1.2rem;
+	font-size: 1.1rem;
+    border-radius: 1rem;
+	-moz-box-shadow: 5px 5px 5px rgba(68,68,68,0.6);
+	-webkit-box-shadow: 5px 5px 5px rgba(68,68,68,0.6);
+	box-shadow: 5px 5px 5px rgba(68,68,68,0.6);
+}
+
+.alternativa .peso {
+	background-color: rgba(0, 0, 0, 0.2);
 }
 
 .form-check label {
@@ -34,3 +61,37 @@ html, body {
 a, .btn-link {
     color: #4433FF;
 }
+
+.selected {
+	background-color: #f9ee9e;
+}
+
+.selected.sent {
+	background-color: #bcd1dc;
+}
+
+h1 span, h2 span, h3 span, h4 span, h5 span {
+	display: inline-block;
+	padding: .6rem;
+    border-radius: 0.3rem;
+}
+
+/*h1 span {
+	background-color: rgba(0, 0, 0, 0.1);
+}
+
+h2 span {
+	background-color: rgba(0, 0, 0, 0.08);
+}
+
+h3 span {
+	background-color: rgba(0, 0, 0, 0.06);
+}
+
+h4 span {
+	background-color: rgba(0, 0, 0, 0.04);
+}
+
+h5 span {
+	background-color: rgba(0, 0, 0, 0.002);
+}*/

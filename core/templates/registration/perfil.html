@@ -3,7 +3,7 @@
 {% block conteudo %}
   <div class="col-lg-12 pt-5">
     <div class= "listagem mb-4 p-4">
-      {% with professor=user.professor %}
+      {% with professor=user.is_professor %}
         <div>
           <h2 class="d-inline">Turmas</h2>
           {% if professor %}
@@ -29,7 +29,7 @@
                       </div>
                     </div>
                   {% else %}
-                    <a href="#" class="btn btn-info">Acessar</a>
+                    <a href="{% url 'turma' turma.id %}" class="btn btn-info">Acessar</a>
                   {% endif %}
                 </div>
               </div>
@@ -65,7 +65,7 @@
                       </div>
                     </div>
                   {% else %}
-                    <a href="#" class="btn btn-info">Resolver</a>
+                    <a href="{% url 'atividade' atividade.id %}" class="btn btn-info">Resolver</a>
                   {% endif %}
                 </div>
               </div>

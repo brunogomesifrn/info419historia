@@ -21,4 +21,35 @@ def e_imagem(arquivo):
     if ext in ['.jpg', '.png', 'jpeg']:
         return True
     else:
-    	return False
+        return False
+
+
+@register.filter()
+def to_list(string):
+    return string.split(',')
+
+
+@register.filter()
+def get_checkbox_meta(form, field):
+    return form.get_checkbox_meta(field)
+
+
+@register.filter()
+def masc_fem(genero, letras='o,a'):
+    letras = letras.split(',')
+    if len(letras) == 1:
+        letras += 'a'
+
+    return (letras[0] if genero == 'm'
+            else letras[1] if genero == 'f'
+            else '')
+
+
+@register.filter()
+def startswith(string, start):
+    return string.startswith(start)
+
+
+@register.filter('breakpoint')
+def _breakpoint(data):
+    breakpoint()

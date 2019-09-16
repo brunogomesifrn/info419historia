@@ -1,0 +1,24 @@
+{% load core_extras %}
+<div class= "documento mb-4 p-4 row">
+  <div class="col-md-10 col-12">
+    {% if n %}
+      <h4>Documento {{n}}</h4>
+    {% endif %}
+    <h5>Título: {{documento.titulo}}</h5>
+    {% if documento.arquivo  == '' %}
+      <div class="texto">
+        <p>{{documento.texto}}</p>
+      </div>
+    {% elif documento.arquivo|e_imagem %}
+      <img src="/media/{{documento.arquivo}}" width="30%" height="auto">
+    {% else %}
+      <a href="/media/{{documento.arquivo}}" class="btn btn-primary">Baixar <i class="fas fa-download"></i></a>
+    {% endif %}
+  </div>
+  <div class="text-left legenda col-md-2 col-12">
+    <h4>Detalhes:</h4>
+    <p><strong>Origem:</strong> {{documento.origem}}<br />
+    <strong>Créditos:</strong> {{documento.creditos}}<br />
+    <strong>Tipo:</strong> {{documento.tipo}}</p>
+  </div>
+</div>
