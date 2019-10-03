@@ -43,13 +43,16 @@
 
         const $tipo = $('select[name=tipo]'),
               $tipoDiv = $tipo.parents('.form-group'),
-              $nomeDiv = $('input[name=nome]').parents('.form-group').hide(),
+              $nomeDiv = $('input[name=nome]').blur(() => {
+                $tipoDiv.show().find('select').val('').focus()
+                $nomeDiv.hide()
+              }).parents('.form-group').hide(),
               $novo = $('<option value="novo">Novo</option>');
 
         $tipo.append($novo).change(function() {
           if ($tipo.val() == 'novo') {
             $tipoDiv.hide()
-            $nomeDiv.show()
+            $nomeDiv.show().find('input').focus()
           }
         })
   	});

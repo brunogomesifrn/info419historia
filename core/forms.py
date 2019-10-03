@@ -2,6 +2,7 @@ from django import forms
 from django.db.models import Q
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.utils.translation import ugettext_lazy as _
+from datetime import timezone
 
 from .models import (Turma, Atividade, Grupo, Tipo, Usuario,
                      Documento, Questao, Alternativa)
@@ -10,10 +11,15 @@ __all__ = ['UsuarioCriacaoForm', 'UsuarioEdicaoForm', 'TurmaForm',
            'DocumentoForm', 'QuestaoForm', 'AlternativaForm', 'RespostaForm']
 
 
+def fix_date(date):
+    return date.astimezone().strftime('%Y-%m-%dT%H:%M')
+
+
 class DateTimeField(forms.DateTimeField):
     def __init__(self, *args, **kwargs):
         super().__init__(input_formats=['%Y-%m-%dT%H:%M'], *args, **kwargs)
-        self.widget = forms.DateTimeInput(attrs={'type': 'datetime-local'})
+        self.widget = forms.DateTimeInput(
+            attrs={'type': 'datetime-local'})
 
 
 class CheckboxSelectMultiple(forms.CheckboxSelectMultiple):
@@ -69,10 +75,16 @@ class AtividadeForm(forms.ModelForm):
 
     class Meta:
         model = Atividade
-        fields = ['assunto', 'peso', 'inicio', 'fim', 'turmas']
+        fields = ['assunto', 'inicio', 'fim', 'turmas']
         widgets = {
             'turmas': CheckboxSelectMultiple('turma', 'f'),
         }
+
+    def __init__(self, *args, **kwargs):
+        if 'instance' in kwargs and kwargs['instance']:
+            kwargs['instance'].inicio = fix_date(kwargs['instance'].inicio)
+            kwargs['instance'].fim = fix_date(kwargs['instance'].fim)
+        super().__init__(*args, **kwargs)
 
 
 class GrupoForm(forms.ModelForm):
@@ -120,6 +132,8 @@ class DocumentoForm(forms.ModelForm):
 
 
 class QuestaoForm(forms.ModelForm):
+    peso = forms.IntegerField(min_value=0)
+
     class Meta:
         model = Questao
         fields = ['comando', 'peso', 'documentos']
@@ -129,6 +143,8 @@ class QuestaoForm(forms.ModelForm):
 
 
 class AlternativaForm(forms.ModelForm):
+    peso = forms.IntegerField(min_value=0, max_value=5)
+
     class Meta:
         model = Alternativa
         fields = ['texto', 'peso']
@@ -140,7 +156,7 @@ class RespostaForm(forms.Form):
         self.resposta = resposta
         self.fields['alternativas'] = forms.ChoiceField(
             widget=forms.RadioSelect,
-            choices=self.get_alternativas(),
+            choices=self.alternativas,
             error_messages={'required': _('Não esqueça de responder essa questão!')})
         try:
             self.fields['alternativas'].initial = resposta.escolha.id
@@ -149,7 +165,8 @@ class RespostaForm(forms.Form):
         except AttributeError:
             pass
 
-    def get_alternativas(self):
+    @property
+    def alternativas(self):
         return [(alternativa.id, alternativa.texto)
                 for alternativa in self.resposta.questao.alternativa_set.all()]
 

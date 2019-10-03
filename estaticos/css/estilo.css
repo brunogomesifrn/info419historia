@@ -16,10 +16,15 @@ html, body {
 
 .listagem {
 	background-color: #87CEFA;
+    border-radius: 1rem;
+}
+
+.listagem .card {
+    border-radius: 1rem;
 }
 
 .questao {
-    padding: 7%;
+    padding: 1rem 3rem;
     margin-bottom: 2rem;
 	background-color: rgba(0, 0, 0, 0.1);
     border-radius: 1rem;
@@ -39,12 +44,14 @@ html, body {
     border-radius: 1rem;
 }
 
-.alternativa {
-	background-color: #ffffcd;
+.alternativa, .alternativa-form {
 	margin-bottom: 0.8rem;
 	padding: 1.2rem;
 	font-size: 1.1rem;
     border-radius: 1rem;
+}
+.alternativa {
+	background-color: #ffffcd;
 	-moz-box-shadow: 5px 5px 5px rgba(68,68,68,0.6);
 	-webkit-box-shadow: 5px 5px 5px rgba(68,68,68,0.6);
 	box-shadow: 5px 5px 5px rgba(68,68,68,0.6);
@@ -52,6 +59,10 @@ html, body {
 
 .alternativa .peso {
 	background-color: rgba(0, 0, 0, 0.2);
+}
+
+.alternativa-form {
+	background-color: #ffffbd;
 }
 
 .form-check label {
@@ -76,6 +87,32 @@ h1 span, h2 span, h3 span, h4 span, h5 span {
     border-radius: 0.3rem;
 }
 
+.btn {
+	border-radius: 0.6rem;
+    border-radius: 1rem;
+	border-width: 0.1rem;
+}
+
+.btn-primary {
+	border-color: #004bcf;
+}
+
+.btn-info {
+	border-color: #077288;
+}
+
+.btn-success {
+	border-color: #087715;
+}
+
+.btn-danger {
+	border-color: #ac0515;
+}
+
+.form-control {
+	border-radius: 1rem;
+	background-color: rgba(255, 255, 255, 0.8);
+}
 /*h1 span {
 	background-color: rgba(0, 0, 0, 0.1);
 }

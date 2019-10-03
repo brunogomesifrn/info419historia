@@ -71,7 +71,6 @@ class Turma(models.Model):
 
 class Atividade(models.Model):
     assunto = models.CharField('Assunto', max_length=50)
-    peso = models.IntegerField('Peso')
     inicio = models.DateTimeField('Início')
     fim = models.DateTimeField('Fim')
     turmas = models.ManyToManyField(Turma)

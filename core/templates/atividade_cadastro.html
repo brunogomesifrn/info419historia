@@ -9,25 +9,28 @@
       {% csrf_token %}
       {% include 'form.html' with form=atividade_form only %}
       {% for questao_form in questoes_forms %}
-        <hr />
         {% with n=forloop.counter %}
-          <h3 class="mt-5">Questão {{n}}</h3>
-          {% include 'form.html' with form=questao_form only %}
-          {% with alternativas_forms=alternativas_forms_questao|index:forloop.counter0 %}
-            {% for alternativa_form in alternativas_forms %}
-              <h4>Alternativa {{forloop.counter}}</h6>
-              {% include 'form.html' with form=alternativa_form only %}
-            {% endfor %}
-            <input type="hidden" name="quant_alternativas-q{{n}}" class="form-control" value="{{alternativas_forms|length}}" required />
-            <button type="submit" class="btn btn-outline-success btn-sm my-2" name="acao" value="nova_alternativa-q{{n}}">Adicionar alternativa</button>
-            <button type="submit" class="btn btn-outline-danger btn-sm my-2" name="acao" value="remover_alternativa-q{{n}}">Remover alternativa</button><br/>
+          <div class="questao">
+            <h3>Questão {{n}}</h3>
+            {% include 'form.html' with form=questao_form only %}
+            {% with alternativas_forms=alternativas_forms_questao|index:forloop.counter0 %}
+              {% for alternativa_form in alternativas_forms %}
+                <div class="alternativa-form">
+                  <h4>Alternativa {{forloop.counter}}</h4>
+                  {% include 'form.html' with form=alternativa_form only %}
+                </div>
+              {% endfor %}
+              <input type="hidden" name="quant_alternativas-q{{n}}" class="form-control" value="{{alternativas_forms|length}}" required />
+              <button type="submit" class="btn btn-success btn-sm m-2" name="acao" value="nova_alternativa-q{{n}}">Adicionar alternativa</button>
+              <button type="submit" class="btn btn-danger btn-sm m-2" name="acao" value="remover_alternativa-q{{n}}">Remover alternativa</button><br/>
+            </div>
           {% endwith %}
         {% endwith %}
       {% endfor %}
       <input type="hidden" name="quant_questoes" class="form-control" value="{{questoes_forms|length}}" required />
-      <button type="submit" class="btn btn-success my-2" name="acao" value="nova_questao">Adicionar questão</button>
-      <button type="submit" class="btn btn-danger my-2" name="acao" value="remover_questao">Remover questão</button><br/>
-      <button type="submit" class="btn btn-primary btn-lg my-2" name="acao" value="salvar">Salvar</button>
+      <button type="submit" class="btn btn-success m-2" name="acao" value="nova_questao">Adicionar questão</button>
+      <button type="submit" class="btn btn-danger m-2" name="acao" value="remover_questao">Remover questão</button><br/>
+      <button type="submit" class="btn btn-primary btn-lg m-2" name="acao" value="salvar">Salvar</button>
   	</form>
   </div>
 {% endblock %}

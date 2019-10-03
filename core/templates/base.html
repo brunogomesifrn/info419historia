@@ -74,24 +74,17 @@
   <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
   <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>  {% block scripts %}
   <script type="text/javascript">
-    $((e) => {
-      {# Sempre um botão que tenha "name=acao" for clicado, um novo input será criado e enviará para views.py a ação que deverá acontecer. Por exemplo, adicionar uma nova questão ou salvar ou dados. #}
-      $('button[name=acao]').click(() => {
-        $('form').append(
-          $('<input[type=hidden]>')
-            .attr('name', 'acao')
-            .val($(this).val())
-        )
-        return true;
-      });
+    $((e) =>
       $('button[name=abrir_cadastro]').click((e) => {
         $button = $(e.target);
         window.open($button.val());
       });
 
-      $('input[type=radio]:checked').parents('.form-control, .alternativa').addClass('selected')
-      $('input[type=radio]:checked:disabled').parents('.form-control, .alternativa').addClass('sent')
-      $('input[type=radio], input[type=checkbox]').change((e) => {
+      $input_radio = $('input[type=radio]');
+      $input_radio_checked = $input_radio.filter(':checked');
+      $input_radio_checked.parents('.form-control, .alternativa').addClass('selected')
+      $input_radio_checked.filter(':disabled').parents('.form-control, .alternativa').addClass('sent')
+      $input_radio.change((e) => {
         $(e.target).parents('.form-control, .alternativa').addClass('selected')
           .siblings('.selected').removeClass('selected')
       }).parents('.form-control, .alternativa').each((i, el) => {
@@ -101,17 +94,21 @@
           $input = $(e.target).find('input');
           if ($input.is(':disabled'))
             return;
-          if ($input.is(':checkbox')) {
-            checked = $input.is(':checked');
-            $input.prop('checked', !checked);
-          } else {
-            name = $input.attr('name');
-            $('input[name='+name+']:checked')
-              .prop('checked', false)
-            $input
-              .prop('checked', true)
-              .change();
-          }
+          name = $input.attr('name');
+          $('input[name='+name+']:checked')
+            .prop('checked', false)
+          $input
+            .prop('checked', true)
+            .change();
+        });
+      });
+      $('input[type=checkbox]').parents('.form-control').each((i, el)=> {
+        $(el).click((e) => {
+          if (e.target !== el)
+            return;
+          $input = $(e.target).find('input');
+          checked = $input.is(':checked');
+          $input.prop('checked', !checked);
         });
       });
     });

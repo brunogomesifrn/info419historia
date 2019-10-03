@@ -2,10 +2,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User, Group
 # from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required, permission_required
+from django.db.models.aggregates import Sum
 from .forms import *
 from .models import (Usuario, Turma, Atividade, Alternativa, Grupo,
                      Documento, Resposta)
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
+from django.utils import timezone
 
 
 # Create your views here.
@@ -277,6 +279,7 @@ def atividade(request, id):
     atividade = get_object_or_404(Atividade, pk=id)
     contexto = {
         'atividade': atividade,
+        'agora': timezone.now(),
     }
     if request.user.is_professor():
         return render(request, 'atividade.html', contexto)
@@ -331,6 +334,22 @@ def atividade_remocao(request, id):
     atividade = get_object_or_404(Atividade, pk=id)
     atividade.delete()
     return redirect('perfil')
+
+
+def gerar_notas(request, atividade_id):
+    grupos = Grupo.objects.filter(atividade__id=atividade_id)
+    atividade = grupos[0].atividade
+    nota_total = atividade.questao_set.aggregate(Sum('peso'))['peso__sum']
+    for grupo in grupos:
+        nota = 0
+        for questao in atividade.questao_set.all():
+            resposta = Resposta.objects.get(grupo=grupo, questao=questao)
+            if resposta.enviada:
+                nota += resposta.escolha.peso * questao.peso
+        nota *= 20 / nota_total
+        grupo.nota = nota
+        grupo.save()
+    return redirect('atividade', atividade_id)
 
 
 @login_required

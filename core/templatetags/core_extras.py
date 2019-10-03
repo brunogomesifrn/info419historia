@@ -25,8 +25,11 @@ def e_imagem(arquivo):
 
 
 @register.filter()
-def to_list(string):
-    return string.split(',')
+def beautify(time):
+    time = time.split(',')[0]
+    if time.startswith('0'):
+        time = 'Finalizada'
+    return time
 
 
 @register.filter()

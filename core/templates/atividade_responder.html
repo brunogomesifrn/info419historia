@@ -4,7 +4,7 @@
 {% block conteudo %}
   <div class="col-lg-12 text-center p-5">
     <h1>{{atividade}}</h1>
-    <p><i class="far fa-clock"></i> {{atividade.fim|timeuntil|to_list|first}}</p>
+    <p><i class="far fa-clock"></i> {{atividade.fim|timeuntil|beautify}}</p>
     <form method="post" class="mx-auto">
       {% csrf_token %}
       {% for form in forms %}
@@ -16,8 +16,12 @@
           {% include 'form.html' with form=form custum_radio_class='alternativa' only %}
         </div>
       {% endfor %}
-      <button type="submit" class="btn btn-success my-2" name='acao' value='enviar'>Enviar</button>
-      <button type="submit" class="btn btn-primary my-2" name='acao' value='salvar'>Salvar</button>
+      {% if atividade.fim >= agora %}
+        <button type="submit" class="btn btn-success m-2" name='acao' value='enviar'>Enviar</button>
+        <button type="submit" class="btn btn-primary m-2" name='acao' value='salvar'>Salvar</button>
+      {% else %}
+        <h4><span>Sinto muito! Você não pode mais enviar, o tempo da atividade acabou.<span></h4>
+      {% endif %}
     </form>
   </div>
 {% endblock %}
