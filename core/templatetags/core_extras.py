@@ -52,6 +52,17 @@ def masc_fem(genero, letras='o,a'):
 def startswith(string, start):
     return string.startswith(start)
 
+@register.filter()
+def grupo(user, atividade):
+    return user.get_grupo(atividade)
+
+# @register.filter()
+# def nota(grupo):
+#     grupo = user.get_grupo(atividade)
+#     if not grupo or not grupo.nota: 
+#         return False
+#     return grupo.nota
+
 
 @register.filter('breakpoint')
 def _breakpoint(data):

@@ -1,7 +1,8 @@
-from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.contrib.auth.models import Permission
 from django.utils.translation import ugettext_lazy as _
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class UserManager(BaseUserManager):
@@ -54,11 +55,14 @@ class Usuario(AbstractUser):
     def __str__(self):
         return self.nome + ' ' + self.sobrenome + ' (' + self.matricula + ')'
 
-    def get_genero():
-        return 'm'
-
     def is_professor(self):
         return self.groups.filter(name__startswith="P").exists()
+
+    def get_grupo(self, atividade):
+        try:
+            return self.grupo_set.get(atividade=atividade)
+        except ObjectDoesNotExist:
+            return Grupo.objects.none()
 
 
 class Turma(models.Model):

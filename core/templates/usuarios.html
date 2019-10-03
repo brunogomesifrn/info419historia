@@ -21,8 +21,8 @@
               <td>{{usuario.email}}</td>
               <td>{{usuario.is_professor|yesno:'Sim,Não'}}</td>
               <td>
-                <a href="{% url 'usuario_edicao' usuario.id %}"><button class="btn btn-primary">Editar</button></a>
-                <button class="btn btn-danger" data-toggle="modal" data-target="#confirmacao" data-nome="{{usuario.nome}}" data-url="{% url 'usuario_remocao' usuario.id %}">Apagar</button>
+                <a href="{% url 'usuario_edicao' usuario.id %}"><button class="btn btn-success"><i class="fas fa-edit"></i></button></a>
+                <button class="btn btn-danger" data-toggle="modal" data-target="#confirmacao" data-nome="{{usuario.nome}}" data-url="{% url 'usuario_remocao' usuario.id %}"><i class="fas fa-trash"></i></button>
               </td>
           {% endfor %}
         </tbody>

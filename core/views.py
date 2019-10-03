@@ -9,17 +9,18 @@ from .models import (Usuario, Turma, Atividade, Alternativa, Grupo,
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.utils import timezone
 
-
-# Create your views here.
-
+agora = timezone.now()
 
 @login_required
 def perfil(request):
-    turmas = Turma.objects.order_by('nome')
+    turmas = Turma.objects.filter(membros=request.user).order_by('nome')
     atividades = Atividade.objects.order_by('fim')
+    if not request.user.is_professor():
+        atividades = atividades.filter(inicio__lte=agora)
     contexto = {
         'turmas': turmas,
         'atividades': atividades,
+        'agora': agora
     }
     return render(request, 'registration/perfil.html', contexto)
 
@@ -279,14 +280,13 @@ def atividade(request, id):
     atividade = get_object_or_404(Atividade, pk=id)
     contexto = {
         'atividade': atividade,
-        'agora': timezone.now(),
+        'agora': agora,
     }
     if request.user.is_professor():
         return render(request, 'atividade.html', contexto)
 
-    try:
-        grupo = request.user.grupo_set.get(atividade=atividade)
-    except ObjectDoesNotExist:
+    grupo = request.user.get_grupo(atividade)
+    if not grupo:
         return redirect('grupo_cadastro', id)
 
     forms = []
