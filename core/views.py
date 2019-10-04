@@ -1,23 +1,33 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.models import User, Group
-# from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required, permission_required
+from django.core.exceptions import PermissionDenied
 from django.db.models.aggregates import Sum
-from .forms import *
-from .models import (Usuario, Turma, Atividade, Alternativa, Grupo,
-                     Documento, Resposta)
-from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.utils import timezone
+from django.middleware.csrf import get_token
+from .forms import *
+from .models import (Usuario, Turma, Atividade, Grupo,
+                     Documento, Resposta)
 
 agora = timezone.now()
 
+
 @login_required
-def perfil(request):
+def perfil(request, turma_id=None):
     turmas = Turma.objects.filter(membros=request.user).order_by('nome')
     atividades = Atividade.objects.order_by('fim')
     if not request.user.is_professor():
         atividades = atividades.filter(inicio__lte=agora)
+
+    acao = request.POST.get('acao', '')
+    turma_form = (turma_cadastro(request)
+                  if acao == 'turma-salvar'
+                  else turma_edicao(request, turma_id)
+                  if turma_id
+                  else TurmaForm())
+
     contexto = {
+        'turma_form': turma_form,
         'turmas': turmas,
         'atividades': atividades,
         'agora': agora
@@ -102,18 +112,11 @@ def turma(request, id):
 @login_required
 @permission_required('core.add_turma', raise_exception=True)
 def turma_cadastro(request):
-    form = TurmaForm(request.POST or None)
-    acao = ""
+    form = TurmaForm(request.POST)
     if form.is_valid():
         form.save()
-        form = TurmaForm()
-        acao = 'fechar'
-    contexto = {
-        'form': form,
-        'acao': acao,
-        'titulo': 'Cadastrar uma nova turma',
-    }
-    return render(request, 'turma_cadastro.html', contexto)
+        form.data = {}
+    return form
 
 
 @login_required
@@ -144,10 +147,19 @@ def atividade_formulario(request,
                          default_quant_questoes=1,
                          default_quant_alternativas=None,
                          atividade=None):
-    acao = request.POST['acao'] if 'acao' in request.POST else ''
+    acao = request.POST.get('acao', '')
+
+    turma_form = (turma_cadastro(request.POST)
+                  if acao == 'turma-salvar'
+                  else TurmaForm())
+
+    documento_form, tipo_form = (documento_cadastro(request)
+                                 if (acao == 'documento-salvar' or
+                                     acao == 'tipo-salvar')
+                                 else (DocumentoForm(prefix='documento'),
+                                       TipoForm(prefix='tipo')))
 
     atividade_form = AtividadeForm(request.POST or None,
-                                   use_required_attribute=False,
                                    instance=atividade)
     if acao != 'salvar':
         for field in atividade_form.fields:
@@ -203,7 +215,6 @@ def atividade_formulario(request,
         # nomeadas "questao1", "questao2", ...
         questao_form = QuestaoForm(request.POST or None,
                                    prefix="questao%d" % n,
-                                   use_required_attribute=False,
                                    instance=questao)
         questoes_forms.append(questao_form)
         if acao != 'salvar':
@@ -224,12 +235,12 @@ def atividade_formulario(request,
             alternativa_form = AlternativaForm(
                 request.POST or None,
                 prefix="alternativa%d-q%d" % (m, n),
-                use_required_attribute=False,
                 instance=alternativa)
             alternativas_forms.append(alternativa_form)
             if acao != 'salvar':
                 for field in alternativa_form.fields:
-                    alternativa_form.errors[field] = alternativa_form.error_class()
+                    alternativa_form.errors[field] = alternativa_form.error_class(
+                    )
         # Armazenada as listas na outra
         alternativas_forms_questao.append(alternativas_forms)
 
@@ -256,10 +267,14 @@ def atividade_formulario(request,
                 alternativa.save()
         return redirect('atividade', atividade.id)
     contexto = {
+        'turma_form': turma_form,
+        'documento_form': documento_form,
+        'tipo_form': tipo_form,
         'atividade_form': atividade_form,
         'questoes_forms': questoes_forms,
         'alternativas_forms_questao': alternativas_forms_questao,
         'titulo': titulo,
+        'csrf_token': get_token(request),
     }
     return render(request, 'atividade_cadastro.html', contexto)
 
@@ -421,26 +436,25 @@ def documentos(request):
 @permission_required('core.add_documento', raise_exception=True)
 @permission_required('core.add_tipo', raise_exception=True)
 def documento_cadastro(request):
-    if 'composicao' in request.POST:
-        composicao = request.POST['composicao']
-        if composicao == 0:
-            request.POST['arquivo'] = None
-        elif composicao == 1:
-            request.POST['texto'] = None
-    form = DocumentoForm(request.POST or None,
-                         request.FILES or None,
-                         use_required_attribute=False)
-    tipo_form = TipoForm(request.POST or None, use_required_attribute=False)
+    acao = request.POST.get('acao', '')
+    tipo_form = (TipoForm(request.POST, prefix='tipo')
+                 if acao == 'tipo-salvar'
+                 else TipoForm(prefix='tipo'))
     if tipo_form.is_valid():
-        tipo = tipo_form.save()
-        data = form.data.copy()
-        data['tipo'] = tipo.id
-        form = DocumentoForm(data)
-    if form.is_valid():
-        form.save()
-        return render(request, 'documento_cadastro.html', {'acao': 'fechar'})
-    contexto = {
-        'form': form,
-        'tipo_form': tipo_form,
-    }
-    return render(request, 'documento_cadastro.html', contexto)
+        tipo_form.save()
+
+    composicao = request.POST.get('documento-composicao', '')
+    if composicao == 0:
+        request.POST['documento-arquivo'] = None
+    elif composicao == 1:
+            request.POST['documento-texto'] = None
+    documento_form = (DocumentoForm(request.POST,
+                                    request.FILES,
+                                    prefix='documento')
+                      if acao == 'documento-salvar'
+                      else DocumentoForm(prefix='documento'))
+    if documento_form.is_valid():
+        documento_form.save()
+        documento_form.data = {}
+
+    return documento_form, tipo_form

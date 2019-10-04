@@ -7,7 +7,7 @@
       {% for atividade in atividades %}
         <li class="list-group-item"><a href="{% url 'atividade' atividade.id %}">{{atividade}}</a></li>
       {% empty %}
-        <li class="list-group-item">Nenhuma atividade cadastrada</li>
+        s<li class="list-group-item">Nenhuma atividade cadastrada</li>
       {% endfor %}
     </ul>
   </div>

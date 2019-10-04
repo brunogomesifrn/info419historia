@@ -68,6 +68,9 @@ class TurmaForm(forms.ModelForm):
             'membros': CheckboxSelectMultiple('usuario', 'm'),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(use_required_attribute=False, *args, **kwargs)
+
 
 class AtividadeForm(forms.ModelForm):
     inicio = DateTimeField()
@@ -84,7 +87,7 @@ class AtividadeForm(forms.ModelForm):
         if 'instance' in kwargs and kwargs['instance']:
             kwargs['instance'].inicio = fix_date(kwargs['instance'].inicio)
             kwargs['instance'].fim = fix_date(kwargs['instance'].fim)
-        super().__init__(*args, **kwargs)
+        super().__init__(use_required_attribute=False, *args, **kwargs)
 
 
 class GrupoForm(forms.ModelForm):
@@ -120,6 +123,9 @@ class TipoForm(forms.ModelForm):
         model = Tipo
         fields = ['nome']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(use_required_attribute=False, *args, **kwargs)
+
 
 class DocumentoForm(forms.ModelForm):
     class Meta:
@@ -127,7 +133,7 @@ class DocumentoForm(forms.ModelForm):
         fields = ['titulo', 'origem', 'creditos', 'texto', 'arquivo', 'tipo']
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(use_required_attribute=False, *args, **kwargs)
         self.fields['tipo'].empty_label = "Nenhum"
 
 
@@ -141,6 +147,9 @@ class QuestaoForm(forms.ModelForm):
             'documentos': CheckboxSelectMultiple('documento', 'm'),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(use_required_attribute=False, *args, **kwargs)
+
 
 class AlternativaForm(forms.ModelForm):
     peso = forms.IntegerField(min_value=0, max_value=5)
@@ -148,6 +157,9 @@ class AlternativaForm(forms.ModelForm):
     class Meta:
         model = Alternativa
         fields = ['texto', 'peso']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(use_required_attribute=False, *args, **kwargs)
 
 
 class RespostaForm(forms.Form):

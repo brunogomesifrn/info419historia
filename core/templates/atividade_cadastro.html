@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
 {% load core_extras %}
+{% load static %}
 
 {% block conteudo %}
   <div class="col-lg-12 text-center pt-5">
@@ -36,23 +37,23 @@
 {% endblock %}
 
 {% block scripts %}
-  {{ block.super }}
+  <script src="{% static 'js/modal.js' %}"></script>
   <script type="text/javascript">
     $(function(e) {
       {# A função "able_disable" testa se todos os inputs, textareas e selects possuem algum valor. Se não, o botão "salvar" será desativado #}
-      var $salvar_btn = $('button[value="salvar"]');
-      able_disable = function(){
-        state = false
-        $('input[type!=hidden], textarea, select').each(function(){
-          state = state || $(this).val() == '';
-        });
-        $salvar_btn.prop('disabled', state);
-      }
+      // var $salvar_btn = $('button[value="salvar"]');
+      // able_disable = function(){
+      //   state = false
+      //   $('input[type!=hidden], textarea, select').each(function(){
+      //     state = state || $(this).val() == '';
+      //   });
+      //   $salvar_btn.prop('disabled', state);
+      // }
       {# Sempre que for mudado o valor ou precissionada uma tecla dentro de um input, textarea ou select, a função "able_disable" será chamada, para ativivar ou desativar o botão "salvar" quando necessário #}
-      $('input, textarea, select')
-        .change(function(){able_disable();})
-        .keyup(function(){able_disable();});
-      able_disable()
+      // $('input, textarea, select')
+      //   .change(function(){able_disable();})
+      //   .keyup(function(){able_disable();});
+      // able_disable()
 
       {# Se houver 1 questão ou menos, o botão "remover questão" será desativado #}
       if ($('input[name=quant_questoes]').val() <= 1)
@@ -63,6 +64,74 @@
         if ($('input[name=quant_alternativas-q{{n}}]').val() <= 2)
           $('button[value=remover_alternativa-q{{n}}]').prop('disabled', true);
       {% endfor %}
+
+      turma_cadastro = M('turma_cadastro', {
+        content: `{% include "turma_cadastro.html" with titulo="Cadastrar nova turma" form=turma_form csrf_token=csrf_token only %}`,
+        size: 'lg'
+      }).add_to_body()
+      {% if turma_form.errors %}
+        turma_cadastro.open();
+      {% endif %}
+      documento_cadastro = M('documento_cadastro', {
+        content: `{% include "documento_cadastro.html" with titulo="Cadastrar novo documento" form=documento_form tipo_form=tipo_form csrf_token=csrf_token only %}`,
+        size: 'lg'
+      }).add_to_body()
+      {% if documento_form.errors %}
+        documento_cadastro.open();
+      {% endif %}
+
+      const $arquivoDiv = $('input[name=documento-arquivo]').parents('.form-group').hide(),
+            $textoDiv = $('textarea[name=documento-texto]').parents('.form-group');
+      $('<div class="control-group form-group">')
+        .append($('<div class="controls">')
+          .append($('<label>O documento será composto por um:</label>'))
+          .append($('<select class="form-control" name="documento-composicao">')
+            .append(
+              $('<option value=0 selected>Texto</option>'),
+              $('<option value=1>Arquivo</option>')
+            ).change(function(){
+              if ($(this).val() == '0') {
+                $textoDiv.show();
+                $arquivoDiv.hide();
+              }
+              else {
+                $textoDiv.hide();
+                $arquivoDiv.show();
+              }
+            }))
+        ).insertBefore($textoDiv);
+
+        const $tipo = $('select[name=documento-tipo]'),
+              $tipoDiv = $tipo.parents('.form-group'),
+              $nome = $('input[name=tipo-nome]').blur((e) => {
+                if ($(e.target).next().is(':hover'))
+                  return;
+                $tipoDiv.show()
+                $tipo.val('').focus()
+                $nomeDiv.hide()
+              }),
+              $nomeDiv = $nome.parents('.form-group').hide(),
+              $novo = $('<option value="novo">Novo</option>');
+        $nome.wrap('<div class=inline-button></div>').parents('.inline-button').append("<button type=submit name=acao value=tipo-salvar class=\"btn btn-primary py-0\">Salvar</button>")
+        $tipo.append($novo).change(function() {
+          if ($tipo.val() == 'novo') {
+            $tipoDiv.hide()
+            $nomeDiv.show()
+            $nome.focus()
+          }
+        });
+        {% if tipo_form.errors %}
+          $('select[name=documento-tipo]').val('novo').change()
+          documento_cadastro.open()
+        {% endif %}
+        {% if tipo_form.is_bound %}
+          $('select[name=documento-tipo]')
+            .val($('option:contains({{tipo_form.nome.value}})').val())
+            .change();
+          $('input[name=tipo-nome]').val('');
+          documento_cadastro.open()
+        {% endif %}
     });
   </script>
+  <script src="{% static 'js/check_checkbox.js' %}"></script>
 {% endblock %}

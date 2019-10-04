@@ -1,60 +1,14 @@
-{% extends 'base.html' %}
-{% load widget_tweaks %}
-{% load core_extras %}
-
-{% block conteudo %}
-	<div class="col-lg-12 text-center">
-		<h1 class="mt-5">Cadastrar novo documento</h1>
-		<form method="post" enctype="multipart/form-data" class="w-75 mx-auto">
-			{% csrf_token %}
-      {% include 'form.html' with form=form only %}
-      {% include 'form.html' with form=tipo_form only %}
-      <button type="submit" class="btn btn-primary">Salvar</button>
-		</form>
-	</div>
-{% endblock %}
-
-{% block scripts %}
-  <script type="text/javascript">
-  	$(function(){
-      if ("{{acao}}" == "fechar")
-        close()
-
-  		const $arquivoDiv = $('input[name=arquivo]').parents('.form-group').hide(),
-            $textoDiv = $('textarea[name=texto]').parents('.form-group');
-  		$('<div class="control-group form-group">')
-				.append($('<div class="controls">')
-					.append($('<label>O documento será composto por um:</label>'))
-					.append($('<select class="form-control" name="composicao">')
-						.append(
-							$('<option value=0 selected>Texto</option>'),
-							$('<option value=1>Arquivo</option>')
-						).change(function(){
-							if ($(this).val() == '0') {
-								$textoDiv.show();
-								$arquivoDiv.hide();
-							}
-							else {
-								$textoDiv.hide();
-								$arquivoDiv.show();
-							}
-						}))
-				).insertBefore($textoDiv);
-
-        const $tipo = $('select[name=tipo]'),
-              $tipoDiv = $tipo.parents('.form-group'),
-              $nomeDiv = $('input[name=nome]').blur(() => {
-                $tipoDiv.show().find('select').val('').focus()
-                $nomeDiv.hide()
-              }).parents('.form-group').hide(),
-              $novo = $('<option value="novo">Novo</option>');
-
-        $tipo.append($novo).change(function() {
-          if ($tipo.val() == 'novo') {
-            $tipoDiv.hide()
-            $nomeDiv.show().find('input').focus()
-          }
-        })
-  	});
-  </script>
-{% endblock %}
+<form method="post" enctype="multipart/form-data">
+  <div class="modal-header">
+    <h5 class="modal-title">{{titulo}}</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar"><span aria-hidden="true">×</span></button>
+  </div>
+  <div class="modal-body">
+    <input type='hidden' name='csrfmiddlewaretoken' value='{{csrf_token}}' />
+    {% include 'form.html' with form=form only %}
+    {% include 'form.html' with form=tipo_form only %}
+  </div>
+  <div class="modal-footer">
+    <button type="submit" class="btn btn-primary" name="acao" value="documento-salvar">Salvar</button>
+  </div>
+</form>

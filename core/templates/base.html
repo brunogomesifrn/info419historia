@@ -68,69 +68,20 @@
       </div>
     </div>
   </footer>
-
-  <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="title" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header"></div>
-        <div class="modal-body"></div>
-        <div class="modal-footer"></div>
-      </div>
-    </div>
-  </div>
   <!-- Bootstrap core JavaScript -->
-  <script src="{% static 'jquery/jquery.slim.min.js' %}"></script>
+  <script src="{% static 'jquery/jquery.min.js' %}"></script>
   <script src="{% static 'jquery/jquery.cookie.js' %}"></script>
   <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
-  <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>  {% block scripts %}
-  <script type="text/javascript">
-    open_model = (header, body, footer) => {
-      $modal = $('modal');
-      $modal.find('.modal-header').html(header);
-      $modal.find('.modal-body').html(body);
-      $modal.find('.modal-footer').html(footer);
-      return $modal;
-    }
-
-    $((e) => {
-      $('button[name=abrir_cadastro]').click((e) => {
-        $button = $(e.target);
-        window.open($button.val());
-      });
-
-      $input_radio = $('input[type=radio]');
-      $input_radio_checked = $input_radio.filter(':checked');
-      $input_radio_checked.parents('.form-control, .alternativa').addClass('selected')
-      $input_radio_checked.filter(':disabled').parents('.form-control, .alternativa').addClass('sent')
-      $input_radio.change((e) => {
-        $(e.target).parents('.form-control, .alternativa').addClass('selected')
-          .siblings('.selected').removeClass('selected')
-      }).parents('.form-control, .alternativa').each((i, el) => {
-        $(el).click((e) => {
-          if (e.target !== el)
-            return;
-          $input = $(e.target).find('input');
-          if ($input.is(':disabled'))
-            return;
-          name = $input.attr('name');
-          $('input[name='+name+']:checked')
-            .prop('checked', false)
-          $input
-            .prop('checked', true)
-            .change();
+  <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  {% block scripts %}
+    <script type="text/javascript">
+      $((e) => {
+        $('button[name=abrir_cadastro]').click((e) => {
+          $button = $(e.target);
+          window.open($button.val());
         });
       });
-      $('input[type=checkbox]').parents('.form-control').each((i, el)=> {
-        $(el).click((e) => {
-          if (e.target !== el)
-            return;
-          $input = $(e.target).find('input');
-          checked = $input.is(':checked');
-          $input.prop('checked', !checked);
-        });
-      });
-    });
-  </script>
+    </script>
   {% endblock %}
 </body>
 </html>

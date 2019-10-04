@@ -1,4 +1,4 @@
-body {
+body, .modal-body {
 	background-color: #7FBEC0;
 }
 
@@ -6,14 +6,15 @@ html, body {
 	height: 100%;
 }
 
-.footer {
+.navbar, .modal-header {
+	background-color: #4F8E90;
+	color: white;
+}
+
+
+.footer, .modal-footer {
     background-color: #4F8E90;
 }
-
-.navbar {
-	background-color: #4F8E90;
-}
-
 .listagem {
 	background-color: #87CEFA;
     border-radius: 1rem;
@@ -81,14 +82,13 @@ a, .btn-link {
 	background-color: #bcd1dc;
 }
 
-h1 span, h2 span, h3 span, h4 span, h5 span {
+/*h1 span, h2 span, h3 span, h4 span, h5 span {
 	display: inline-block;
 	padding: .6rem;
     border-radius: 0.3rem;
-}
+}*/
 
 .btn {
-	border-radius: 0.6rem;
     border-radius: 1rem;
 	border-width: 0.1rem;
 }
@@ -109,10 +109,16 @@ h1 span, h2 span, h3 span, h4 span, h5 span {
 	border-color: #ac0515;
 }
 
-.form-control {
+.form-control:not(.btn) {
 	border-radius: 1rem;
 	background-color: rgba(255, 255, 255, 0.8);
 }
+
+.form-control.btn:focus {
+	background-color: #007bff;
+	color: white;
+}
+
 /*h1 span {
 	background-color: rgba(0, 0, 0, 0.1);
 }
@@ -132,3 +138,15 @@ h4 span {
 h5 span {
 	background-color: rgba(0, 0, 0, 0.002);
 }*/
+
+div.inline-button {
+  position: relative;
+  overflow: hidden;
+}
+
+div.inline-button button {
+  position: absolute;
+  top: calc(50% - 10.5px );
+  left: calc(100% - 1.5rem - 50px);
+  font-size: .8rem;
+}
