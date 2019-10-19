@@ -9,30 +9,26 @@
     <form method="post" class="w-75 mx-auto">
       {% csrf_token %}
       {% include 'form.html' with form=atividade_form only %}
-      {% for questao_form in questoes_forms %}
+      {% for questao_form in atividade_form.questoes %}
         {% with n=forloop.counter %}
-          <div class="questao">
+          <div class="questao delete_wrapper">
             <h3>Questão {{n}}</h3>
             {% include 'form.html' with form=questao_form only %}
-            {% with alternativas_forms=alternativas_forms_questao|index:forloop.counter0 %}
-              {% for alternativa_form in alternativas_forms %}
-                <div class="alternativa-form">
-                  <h4>Alternativa {{forloop.counter}}</h4>
-                  {% include 'form.html' with form=alternativa_form only %}
-                </div>
-              {% endfor %}
-              <input type="hidden" name="quant_alternativas-q{{n}}" class="form-control" value="{{alternativas_forms|length}}" required />
-              <button type="submit" class="btn btn-success btn-sm m-2" name="acao" value="nova_alternativa-q{{n}}">Adicionar alternativa</button>
-              <button type="submit" class="btn btn-danger btn-sm m-2" name="acao" value="remover_alternativa-q{{n}}">Remover alternativa</button><br/>
-            </div>
-          {% endwith %}
+            {% for alternativa_form in questao_form.alternativas %}
+              <div class="alternativa-form delete_wrapper">
+                <h4>Alternativa {{forloop.counter}}</h4>
+                {% include 'form.html' with form=alternativa_form only %}
+              </div>
+            {% endfor %}
+            {{questao_form.alternativas.management_form}}
+            <button type="submit" class="btn btn-success btn-sm m-2" name="acao" value="alternativa-q{{n}}-adicionar">Adicionar alternativa</button>
+          </div>
         {% endwith %}
       {% endfor %}
-      <input type="hidden" name="quant_questoes" class="form-control" value="{{questoes_forms|length}}" required />
-      <button type="submit" class="btn btn-success m-2" name="acao" value="nova_questao">Adicionar questão</button>
-      <button type="submit" class="btn btn-danger m-2" name="acao" value="remover_questao">Remover questão</button><br/>
+      {{atividade_form.questoes.management_form}}
+      <button type="submit" class="btn btn-success m-2" name="acao" value="questao-adicionar">Adicionar questão</button>
       <button type="submit" class="btn btn-primary btn-lg m-2" name="acao" value="salvar">Salvar</button>
-  	</form>
+    </form>
   </div>
 {% endblock %}
 
@@ -40,7 +36,7 @@
   <script src="{% static 'js/modal.js' %}"></script>
   <script type="text/javascript">
     $(function(e) {
-      {# A função "able_disable" testa se todos os inputs, textareas e selects possuem algum valor. Se não, o botão "salvar" será desativado #}
+      // A função "able_disable" testa se todos os inputs, textareas e selects possuem algum valor. Se não, o botão "salvar" será desativado
       // var $salvar_btn = $('button[value="salvar"]');
       // able_disable = function(){
       //   state = false
@@ -49,57 +45,98 @@
       //   });
       //   $salvar_btn.prop('disabled', state);
       // }
-      {# Sempre que for mudado o valor ou precissionada uma tecla dentro de um input, textarea ou select, a função "able_disable" será chamada, para ativivar ou desativar o botão "salvar" quando necessário #}
+      // // Sempre que for mudado o valor ou precissionada uma tecla dentro de um input, textarea ou select, a função "able_disable" será chamada, para ativivar ou desativar o botão "salvar" quando necessário
       // $('input, textarea, select')
       //   .change(function(){able_disable();})
       //   .keyup(function(){able_disable();});
       // able_disable()
 
-      {# Se houver 1 questão ou menos, o botão "remover questão" será desativado #}
-      if ($('input[name=quant_questoes]').val() <= 1)
-        $('button[value=remover_questao]').prop('disabled', true);
+      $n_questoes = $('input[name=questao-TOTAL_FORMS]');
+      $('button[value=questao-adicionar]').click((e) => {
+        const antes = parseInt($n_questoes.val());
+        $n_questoes.val(antes+1);
+        return true;
+      });
 
-      {# Se houver 2 alternativas ou menos, o botão "remover alternativa" correspondente será desativado #}
-      {% for n in questoes_forms|length|trange %}
-        if ($('input[name=quant_alternativas-q{{n}}]').val() <= 2)
-          $('button[value=remover_alternativa-q{{n}}]').prop('disabled', true);
-      {% endfor %}
+      for (var n = 1; n <= $n_questoes.val(); n++) {
+        const $n_alternativas = $('input[name=alternativa-q'+n+'-TOTAL_FORMS]');
+        $('button[value=alternativa-q'+n+'-adicionar]').click((e) => {
+          const antes = parseInt($n_alternativas.val());
+          $n_alternativas.val(antes+1);
+          return true;
+        });
+      }
+      const check_deleted = ($checkbox) => {
+              const $delete_wrapper = $checkbox.closest('.delete_wrapper'),
+                    excluida = $checkbox.is(':checked');
+              $delete_wrapper
+                .toggleClass('excluida', excluida)
+                .find('.form-group, .alternativa-form, button').each((i, el) => {
+                  if (!$(el).find($checkbox).length)
+                    $(el).toggle(!excluida) 
+                });
+              if (excluida) {
+                tipo = $delete_wrapper.hasClass('questao')? 'questão' :
+                       $delete_wrapper.hasClass('alternativa-form')? 'alternativa' :
+                       undefined;
+                $delete_wrapper.append($('<span>Essa '+tipo+' será excluída</span>'))
+                $checkbox.siblings().replaceWith('<span>Desfazer</span>')
+              }
+              else {
+                $delete_wrapper.children('span').remove()
+                $checkbox.siblings().replaceWith($('<i class="fas fa-trash"></i>'))
+              }
+            };
+      $('input[name$=DELETE]').each((i, el) => {
+        $checkbox = $(el);
+        check_deleted($checkbox);
+        $checkbox.change((e) => {
+          check_deleted($(e.target))
+        });
+      });
+      const csrf_token = $("[name=csrfmiddlewaretoken]").val()
 
-      turma_cadastro = M('turma_cadastro', {
-        content: `{% include "turma_cadastro.html" with titulo="Cadastrar nova turma" form=turma_form csrf_token=csrf_token only %}`,
-        size: 'lg'
-      }).add_to_body()
+      turma_cadastro = MF(
+        'turma_cadastro', 
+        'Cadastrar nova turma',
+        `{% spaceless %}{% include "form.html" with form=turma_form only %}{% endspaceless %}`,
+        csrf_token
+      ).on_open = check_checkbox;
       {% if turma_form.errors %}
         turma_cadastro.open();
       {% endif %}
-      documento_cadastro = M('documento_cadastro', {
-        content: `{% include "documento_cadastro.html" with titulo="Cadastrar novo documento" form=documento_form tipo_form=tipo_form csrf_token=csrf_token only %}`,
-        size: 'lg'
-      }).add_to_body()
-      {% if documento_form.errors %}
-        documento_cadastro.open();
-      {% endif %}
 
-      const $arquivoDiv = $('input[name=documento-arquivo]').parents('.form-group').hide(),
-            $textoDiv = $('textarea[name=documento-texto]').parents('.form-group');
-      $('<div class="control-group form-group">')
-        .append($('<div class="controls">')
-          .append($('<label>O documento será composto por um:</label>'))
-          .append($('<select class="form-control" name="documento-composicao">')
-            .append(
-              $('<option value=0 selected>Texto</option>'),
-              $('<option value=1>Arquivo</option>')
-            ).change(function(){
-              if ($(this).val() == '0') {
-                $textoDiv.show();
-                $arquivoDiv.hide();
-              }
-              else {
-                $textoDiv.hide();
-                $arquivoDiv.show();
-              }
-            }))
-        ).insertBefore($textoDiv);
+      const documento_cadastro = MF(
+        'documento_cadastro', 
+        'Cadastrar novo documento',
+        `{% spaceless %}
+            {% include "form.html" with form=documento_form only %}
+            {% include "form.html" with form=tipo_form only %}
+         {% endspaceless %}`,
+        csrf_token
+      );
+      documento_cadastro.on_open = () => {
+        check_checkbox();
+        const $arquivoDiv = $('input[name=documento-arquivo]').parents('.form-group').hide(),
+              $textoDiv = $('textarea[name=documento-texto]').parents('.form-group');
+        $('<div class="control-group form-group">')
+          .append($('<div class="controls">')
+            .append($('<label>O documento será composto por um:</label>'))
+            .append($('<select class="form-control" name="documento-composicao">')
+              .append(
+                $('<option value=0 selected>Texto</option>'),
+                $('<option value=1>Arquivo</option>')
+              ).change(function(){
+                if ($(this).val() == '0') {
+                  $textoDiv.show();
+                  $arquivoDiv.hide();
+                }
+                else {
+                  $textoDiv.hide();
+                  $arquivoDiv.show();
+                }
+              }))
+          ).insertBefore($textoDiv);
 
         const $tipo = $('select[name=documento-tipo]'),
               $tipoDiv = $tipo.parents('.form-group'),
@@ -112,7 +149,10 @@
               }),
               $nomeDiv = $nome.parents('.form-group').hide(),
               $novo = $('<option value="novo">Novo</option>');
-        $nome.wrap('<div class=inline-button></div>').parents('.inline-button').append("<button type=submit name=acao value=tipo-salvar class=\"btn btn-primary py-0\">Salvar</button>")
+        $nome
+          .wrap('<div class=inline-button></div>')
+          .parents('.inline-button')
+            .append("<button type=submit name=acao value=tipo_cadastro class=\"btn btn-primary py-0\">Salvar</button>")
         $tipo.append($novo).change(function() {
           if ($tipo.val() == 'novo') {
             $tipoDiv.hide()
@@ -122,15 +162,11 @@
         });
         {% if tipo_form.errors %}
           $('select[name=documento-tipo]').val('novo').change()
-          documento_cadastro.open()
         {% endif %}
-        {% if tipo_form.is_bound %}
-          $('select[name=documento-tipo]')
-            .val($('option:contains({{tipo_form.nome.value}})').val())
-            .change();
-          $('input[name=tipo-nome]').val('');
-          documento_cadastro.open()
-        {% endif %}
+      }
+      {% if documento_form.errors or tipo_form.is_bound %}
+        documento_cadastro.open();
+      {% endif %}
     });
   </script>
   <script src="{% static 'js/check_checkbox.js' %}"></script>

@@ -4,6 +4,8 @@ from django.contrib.auth.models import Permission
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 
+__all__ = ('Usuario', 'Turma', 'Tipo', 'Documento', 'Atividade',
+           'Alternativa', 'Questao', 'Grupo', 'Resposta')
 
 class UserManager(BaseUserManager):
     """Define o manager do model Usuario sem o campo username."""
@@ -73,22 +75,6 @@ class Turma(models.Model):
         return self.nome
 
 
-class Atividade(models.Model):
-    assunto = models.CharField('Assunto', max_length=50)
-    inicio = models.DateTimeField('Início')
-    fim = models.DateTimeField('Fim')
-    turmas = models.ManyToManyField(Turma)
-
-    def __str__(self):
-        return self.assunto
-
-
-class Grupo(models.Model):
-    nota = models.IntegerField('Nota', null=True, blank=True)
-    membros = models.ManyToManyField(Usuario)
-    atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE)
-
-
 class Tipo(models.Model):
     nome = models.CharField('Nome', max_length=50, unique=True)
 
@@ -109,11 +95,22 @@ class Documento(models.Model):
         return self.titulo
 
 
+class Atividade(models.Model):
+    assunto = models.CharField('Assunto', max_length=50)
+    inicio = models.DateTimeField('Início')
+    fim = models.DateTimeField('Fim')
+    turmas = models.ManyToManyField(Turma)
+
+    def __str__(self):
+        return self.assunto
+
+
 class Questao(models.Model):
     comando = models.TextField('Comando')
     peso = models.IntegerField('Peso')
     atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE)
     documentos = models.ManyToManyField(Documento)
+
 
 
 class Alternativa(models.Model):
@@ -123,6 +120,12 @@ class Alternativa(models.Model):
 
     def __str__(self):
         return self.texto
+
+
+class Grupo(models.Model):
+    nota = models.IntegerField('Nota', null=True, blank=True)
+    membros = models.ManyToManyField(Usuario)
+    atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE)
 
 
 class Resposta(models.Model):

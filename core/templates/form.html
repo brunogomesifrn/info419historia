@@ -7,30 +7,39 @@
 {% for field in form %}
 	<div class="control-group form-group">
     <div class="controls">
-      {{field.label_tag}}
-      {% for erro in field.errors %}
-        <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
-      {% endfor %}
-      {% with tipo=field.field.widget %}
-        {% if tipo.input_type == 'checkbox' or tipo.input_type == 'radio' %}
+      {% if field.name|endswith:'DELETE' %}
+        <div class="btn-group-toggle right-top" data-toggle="buttons">
           {% for checkbox in field %}
-            <div class="{% firstof custum_radio_class 'form-control' %}">
-              {{checkbox}}
-              {{checkbox.label}}
-            </div>
-          {% empty %}
-            <div class="form-control">
-              Nenhum{{tipo.genero|masc_fem:''}} {{tipo.nome}} cadastrad{{tipo.genero|masc_fem}}
-            </div>
+            <label class="btn btn-sm btn-danger m-2">
+              {{checkbox}}<i class="fas fa-trash"></i>
+            </label>
           {% endfor %}
-          {% if not tipo.nome|startswith:'usuario' %}
-            <button type="button" data-toggle="modal" data-target="#{{tipo.nome|add:'_cadastro'}}" class="form-control btn btn-primary border-0">Cadastrar outr{{tipo.genero|masc_fem}} {{tipo.nome}}</button>
+        </div>
+      {% else %}
+        {{field.label_tag}}
+        {% for erro in field.errors %}
+          <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
+        {% endfor %}
+        {% with tipo=field.field.widget %}
+          {% if tipo.input_type == 'checkbox' or tipo.input_type == 'radio' %}
+            {% for checkbox in field %}
+              <div class="{% firstof custum_radio_class 'form-control' %}">
+                {{checkbox}}
+              </div>
+            {% empty %}
+              <div class="form-control">
+                Nenhum{{tipo.genero|masc_fem:''}} {{tipo.nome}} cadastrad{{tipo.genero|masc_fem}}
+              </div>
+            {% endfor %}
+            {% if not tipo.nome|startswith:'usuario' %}
+              <button type="button" data-toggle="modal" data-target="#{{tipo.nome|add:'_cadastro'}}" class="form-control btn btn-primary border-0">Cadastrar outr{{tipo.genero|masc_fem}} {{tipo.nome}}</button>
+            {% endif %}
+          {% else %}
+            {{field|add_class:'form-control'}}
           {% endif %}
-        {% else %}
-          {{field|add_class:'form-control'}}
-        {% endif %}
-      {% endwith %}
-      <p class="help-block"></p>
+        {% endwith %}
+      {% endif %}
+      <p class="help-block">{{field.help_block}}</p>
     </div>
   </div>
 {% endfor %}

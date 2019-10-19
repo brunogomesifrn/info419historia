@@ -110,7 +110,7 @@ AUTH_USER_MODEL = 'core.Usuario'
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
-LANGUAGE_CODE = 'pt-br'
+LANGUAGE_CODE = 'en'
 
 TIME_ZONE = 'America/Recife'
 

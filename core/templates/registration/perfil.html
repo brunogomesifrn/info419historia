@@ -22,7 +22,7 @@
                   {% if professor %}
                     <a href="{% url 'turma' turma.id %}" class="btn btn-primary m-1"><i class="fas fa-search"></i></a>
                     <a href="{% url 'turma_edicao' turma.id %}" class="btn btn-success m-1"><i class="fas fa-edit"></i></a>
-                    <button data-toggle="modal" data-target="#confirmacao" data-nome="{{turma.nome}}" data-url="{% url 'turma_remocao' turma.id %}" class="btn btn-danger m-1"><i class="fas fa-trash"></i></button>
+                    <button data-toggle="modal" data-target="#apagar_turma{{turma.id}}" data-modal-role="delete" data-nome="{{turma.nome}}" data-url="{% url 'turma_remocao' turma.id %}" class="btn btn-danger m-1"><i class="fas fa-trash"></i></button>
                   {% else %}
                     <a href="{% url 'turma' turma.id %}" class="btn btn-info">Acessar</a>
                   {% endif %}
@@ -48,27 +48,33 @@
         <div class="row text-center mx-0 mt-4">
           {% for atividade in atividades %}
             <div class="col-lg-3 col-md-4 col-sm-6 col-12 px-2">
-              <div class="card mt-4">
-                <div class="card-body">
-                  <h5 class="card-title">{{atividade}}</h5>
-                  {% with request.user|grupo:atividade as grupo %}
-                    {% if professor %}
-                        <a href="{% url 'atividade' atividade.id %}" class="btn btn-primary m-1"><i class="fas fa-search"></i></a>
-                        <a href="{% url 'atividade_edicao' atividade.id %}" class="btn btn-success m-1"><i class="fas fa-edit"></i></a>
-                        <button data-toggle="modal" data-target="#confirmacao" data-nome="{{atividade.assunto}}" data-url="{% url 'atividade_remocao' atividade.id %}" class="btn btn-danger m-1"><i class="fas fa-trash"></i></button>
-                    {% elif atividade.fim < agora %}
-                      {% firstof grupo.nota "Aguarde a liberação das notas" %}
-                    {% elif atividade.fim >= agora %}
-                      {% if grupo %}
-                        <a href="{% url 'atividade' atividade.id %}" class="btn btn-info">Resolver</a>
-                      {% else %}
-                        <a href="{% url 'grupo_cadastro' atividade.id %}" class="btn btn-success my-1">Criar grupo</a>
-                        <a href="" class="btn btn-info my-1">Entrar em grupo</a>
+              {% with grupo=user|grupo:atividade %}
+                {% with nota=grupo.nota %}
+                  <div class="card mt-4{{nota|check}}">
+                    <div class="card-body">
+                      <h5 class="card-title">{{atividade}}</h5>
+                        {% if professor %}
+                          <a href="{% url 'atividade' atividade.id %}" class="btn btn-primary m-1"><i class="fas fa-search"></i></a>
+                          <a href="{% url 'atividade_edicao' atividade.id %}" class="btn btn-success m-1"><i class="fas fa-edit"></i></a>
+                          <button data-toggle="modal" data-target="#apagar_atividade{{atividade.id}}" data-modal-role="delete" data-nome="{{atividade.assunto}}" data-url="{% url 'atividade_remocao' atividade.id %}" class="btn btn-danger m-1"><i class="fas fa-trash"></i></button>
+                      {% elif atividade.fim < agora %}
+                        {% if nota is None %}
+                          Aguarde a liberação das notas
+                        {% else %}
+                          Nota: {{nota}}
+                        {% endif %}
+                      {% elif atividade.fim >= agora %}
+                        {% if grupo %}
+                          <a href="{% url 'atividade' atividade.id %}" class="btn btn-info">Resolver</a>
+                        {% else %}
+                          <a href="{% url 'grupo_cadastro' atividade.id %}" class="btn btn-success my-1">Criar grupo</a>
+                          <a href="" class="btn btn-info my-1">Entrar em grupo</a>
+                        {% endif %}
                       {% endif %}
-                    {% endif %}
-                  {% endwith %}
-                </div>
-              </div>
+                    </div>
+                  </div>
+                {% endwith %}
+              {% endwith %}
             </div>
             {% empty %}
               {% if professor %}
@@ -86,29 +92,19 @@
 
 {% block scripts %}
   <script src="{% static 'js/modal.js' %}"></script>
+  {% csrf_token %}
   <script type="text/javascript">
     $(() => {
-      title = 'Apagar <span data="nome"></span>?';
-      footer = '<button type="button" class="btn btn-success" data-dismiss="modal">Cancelar</button>'+
-                '<a href="#"><button type="button" class="btn btn-danger">Apagar</button></a>';
-      M('confirmacao', {
-        title: title,
-        footer: footer
-      })
-        .add_to_body()
-        .on_open((event) => {
-          var $button = $(event.relatedTarget)
-          var nome = $button.data('nome')
-          var url = $button.data('url')
-          var $modal = $(event.target)
-          $modal.find('span[data=nome]').text(nome)
-          $modal.find('.modal-footer a').attr('href', url)
-        });
+      const csrf_token = $("[name=csrfmiddlewaretoken]").val()
+      
+      ModalDeletion.create_from_buttons()
 
-      turma_cadastro = M('turma_cadastro', {
-        content: `{% include "turma_cadastro.html" with titulo="Cadastrar nova turma" form=turma_form %}`,
-        size: 'lg'
-      }).add_to_body()
+      turma_cadastro = MF(
+        'turma_cadastro', 
+        'Cadastrar nova turma',
+        `{% spaceless %}{% include "form.html" with form=turma_form only %}{% endspaceless %}`,
+        csrf_token
+      ).on_open = check_checkbox;
       {% if turma_form.errors %}
         turma_cadastro.open();
       {% endif %}

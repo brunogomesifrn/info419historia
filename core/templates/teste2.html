@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load core_extras %}
+{% load static %}
+
+{% block conteudo %}
+  <div class="col-lg-12 text-center pt-5">
+  	<h1>{{titulo}}</h1>
+    <form method="post" class="w-75 mx-auto">
+      {% csrf_token %}
+      {% include 'form.html' with form=atividade_form only %}
+      {% for questao_form in atividade_form.questao_form_set %}
+        {% with n=forloop.counter %}
+          <div class="questao">
+            <h3>Questão {{n}}</h3>
+            {% include 'form.html' with form=questao_form only %}
+            {% for alternativa_form in questao_form.alternativa_form_set %}
+              <div class="alternativa-form">
+                <h4>Alternativa {{forloop.counter}}</h4>
+                {% include 'form.html' with form=alternativa_form only %}
+              </div>
+            {% endfor %}
+            {{questao_form.alternativa_form_set.management_form}}
+            <button type="submit" class="btn btn-success btn-sm m-2" name="acao" value="alternativa-q{{n}}-adicionar">Adicionar alternativa</button>
+            <button type="submit" class="btn btn-danger btn-sm m-2" name="acao" value="alternativa-q{{n}}-remover">Remover alternativa</button><br/>
+          </div>
+        {% endwith %}
+      {% endfor %}
+      {{atividade_form.questao_form_set.management_form}}
+      <button type="submit" class="btn btn-success m-2" name="acao" value="questao-adicionar">Adicionar questão</button>
+      <button type="submit" class="btn btn-danger m-2" name="acao" value="questao-remover">Remover questão</button><br/>
+      <button type="submit" class="btn btn-primary btn-lg m-2" name="acao" value="salvar">Salvar</button>
+    </form>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script type="text/javascript">
+    $(function(e) {
+      $n_questoes = $('input[name=questao-TOTAL_FORMS]');
+      $('button[value=questao-adicionar]').click((e) => {
+        const antes =parseInt($n_questoes.val());
+        $n_questoes.val(antes+1);
+        return true;
+      });
+      $remover_questao = $('button[value=questao-remover]').click((e) => {
+        const antes = parseInt($n_questoes.val());
+        $n_questoes.val(antes-1)
+        return true;
+      });
+
+      // Se houver 1 questão ou menos, o botão de remover questão é desabilitado
+      if ($n_questoes.val() <= 1)
+        $remover_questao.prop('disabled', true);
+
+      for (var n = 1; n <= $n_questoes.val(); n++) {
+        const $n_alternativas = $('input[name=alternativa-q'+n+'-TOTAL_FORMS]');
+        $('button[value=alternativa-q'+n+'-adicionar]').click((e) => {
+          const antes = parseInt($n_alternativas.val());
+          $n_alternativas.val(antes+1);
+          return true;
+        });
+        $remover_alternativa = $('button[value=alternativa-q'+n+'-remover]').click((e) => {
+          const antes = parseInt($n_alternativas.val());
+          $n_alternativas.val(antes-1)
+          return true;
+        });
+        // Se houverem 2 alternativas ou menos, o botão de remover alternativa é desabilitado
+        if ($n_alternativas.val() <= 2)
+          $remover_alternativa.prop('disabled', true);
+      }
+    });
+  </script>
+{% endblock %}
