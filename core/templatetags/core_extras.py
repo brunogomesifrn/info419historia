@@ -1,4 +1,4 @@
-from django import template
+﻿from django import template
 
 register = template.Library()
 
@@ -60,14 +60,15 @@ def startswith(string, start):
 def endswith(string, end):
     return string.endswith(end)
 
+
 @register.filter()
-def grupo(user, atividade):
-    return user.get_grupo(atividade)
+def participacao(user, atividade):
+    return user.get_participacao(atividade)
 
 # @register.filter()
 # def nota(grupo):
 #     grupo = user.get_grupo(atividade)
-#     if not grupo or not grupo.nota: 
+#     if not grupo or not grupo.nota:
 #         return False
 #     return grupo.nota
 
@@ -75,6 +76,7 @@ def grupo(user, atividade):
 @register.simple_tag(name='breakpoint', takes_context=True)
 def _breakpoint(context, *args, **kwargs):
     breakpoint()
+
 
 @register.filter
 def check(nota):

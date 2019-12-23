@@ -1,12 +1,15 @@
-{% load core_extras %}
+﻿{% load core_extras %}
 {% load widget_tweaks %}
 
 {% for erro in form.non_field_errors %}
   <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
 {% endfor %}
-{% for field in form %}
+{% for field in form.hidden_fields %}
+  {{field}}
+{% endfor %}
+{% for field in form.visible_fields %}
 	<div class="control-group form-group">
-    <div class="controls">
+    <div class="controls{% if field.errors %} erro{% endif %}">
       {% if field.name|endswith:'DELETE' %}
         <div class="btn-group-toggle right-top" data-toggle="buttons">
           {% for checkbox in field %}
@@ -17,13 +20,10 @@
         </div>
       {% else %}
         {{field.label_tag}}
-        {% for erro in field.errors %}
-          <div class="alert alert-danger" role="alert">{{erro|escape}}</div>
-        {% endfor %}
         {% with tipo=field.field.widget %}
           {% if tipo.input_type == 'checkbox' or tipo.input_type == 'radio' %}
             {% for checkbox in field %}
-              <div class="{% firstof custum_radio_class 'form-control' %}">
+              <div class="{% firstof radio_class 'form-control' %} cursor-pointer">
                 {{checkbox}}
               </div>
             {% empty %}
@@ -37,6 +37,9 @@
           {% else %}
             {{field|add_class:'form-control'}}
           {% endif %}
+          {% for erro in field.errors %}
+            <small><strong>{{erro|escape}}</strong></small>
+          {% endfor %}
         {% endwith %}
       {% endif %}
       <p class="help-block">{{field.help_block}}</p>

@@ -4,8 +4,8 @@
 
 {% block conteudo %}
   <div class="col-lg-12 pt-5">
-    <div class= "listagem mb-4 p-4">
-      {% with professor=user.is_professor %}
+    {% with professor=user.is_professor %}
+      <div class= "listagem mb-4 px-4 pt-4">
         <div>
           <h2 class="d-inline">Turmas</h2>
           {% if professor %}
@@ -13,7 +13,7 @@
             <button data-toggle="modal" data-target="#turma_cadastro" class="btn btn-primary mb-4 float-right">Cadastrar nova Turma</button>
           {% endif %}
         </div>
-        <div class="row text-center mx-0 mt-4">
+        <div class="row text-center mx-0 mt-4 pb-4">
           {% for turma in turmas %}
             <div class="col-lg-3 col-md-4 col-sm-6 col-12 px-2">
               <div class="card mt-4">
@@ -22,7 +22,7 @@
                   {% if professor %}
                     <a href="{% url 'turma' turma.id %}" class="btn btn-primary m-1"><i class="fas fa-search"></i></a>
                     <a href="{% url 'turma_edicao' turma.id %}" class="btn btn-success m-1"><i class="fas fa-edit"></i></a>
-                    <button data-toggle="modal" data-target="#apagar_turma{{turma.id}}" data-modal-role="delete" data-nome="{{turma.nome}}" data-url="{% url 'turma_remocao' turma.id %}" class="btn btn-danger m-1"><i class="fas fa-trash"></i></button>
+                    <button data-toggle="modal" data-modal="Deletion" data-target="#apagar_turma{{turma.id}}" data-nome="{{turma.nome}}" data-url="{% url 'turma_remocao' turma.id %}" class="btn btn-danger m-1 autocreate"><i class="fas fa-trash"></i></button>
                   {% else %}
                     <a href="{% url 'turma' turma.id %}" class="btn btn-info">Acessar</a>
                   {% endif %}
@@ -38,37 +38,53 @@
           {% endfor %}
         </div>
       </div>
-      <div class= "listagem mb-4 p-4">
+      <div class= "listagem mb-4 px-4 pt-4">
         <div>
           <h2 class="d-inline">Atividades</h2>
           {% if professor %}
             <a href="{% url 'atividade_cadastro' %}" class="btn btn-primary mb-4 float-right">Cadastrar nova Atividade</a>
           {% endif %}
         </div>
-        <div class="row text-center mx-0 mt-4">
+        <div class="row text-center mx-0 mt-4 pb-4">
           {% for atividade in atividades %}
             <div class="col-lg-3 col-md-4 col-sm-6 col-12 px-2">
-              {% with grupo=user|grupo:atividade %}
-                {% with nota=grupo.nota %}
+              {% with participacao=user|participacao:atividade %}
+                {% with nota=participacao.grupo.nota %}
                   <div class="card mt-4{{nota|check}}">
                     <div class="card-body">
                       <h5 class="card-title">{{atividade}}</h5>
-                        {% if professor %}
-                          <a href="{% url 'atividade' atividade.id %}" class="btn btn-primary m-1"><i class="fas fa-search"></i></a>
-                          <a href="{% url 'atividade_edicao' atividade.id %}" class="btn btn-success m-1"><i class="fas fa-edit"></i></a>
-                          <button data-toggle="modal" data-target="#apagar_atividade{{atividade.id}}" data-modal-role="delete" data-nome="{{atividade.assunto}}" data-url="{% url 'atividade_remocao' atividade.id %}" class="btn btn-danger m-1"><i class="fas fa-trash"></i></button>
+                      {% if professor %}
+                        <a href="{% url 'atividade' atividade.id %}" class="btn btn-primary m-1"><i class="fas fa-search"></i></a>
+                        <a href="{% url 'atividade_edicao' atividade.id %}" class="btn btn-success m-1"><i class="fas fa-edit"></i></a>
+                        <button data-toggle="modal" data-modal="Deletion" data-target="#apagar_atividade{{atividade.id}}" data-nome="{{atividade.assunto}}" data-url="{% url 'atividade_remocao' atividade.id %}" class="btn btn-danger m-1 autocreate"><i class="fas fa-trash"></i></button>
                       {% elif atividade.fim < agora %}
-                        {% if nota is None %}
+                        {% if not nota %}
                           Aguarde a liberação das notas
                         {% else %}
                           Nota: {{nota}}
                         {% endif %}
-                      {% elif atividade.fim >= agora %}
-                        {% if grupo %}
-                          <a href="{% url 'atividade' atividade.id %}" class="btn btn-info">Resolver</a>
+                      {% else %}
+                        {% if participacao %}
+                          {% if participacao.confirmado %}
+                            <a href="{% url 'atividade' atividade.id %}" class="btn btn-info d-block">
+                              Resolver
+                              {% if participacao.criador and participacao.grupo.pendencias %}
+                                {% with count=participacao.grupo.pendencias.count %}
+                                  <span class="badge badge-pill badge-light">{{participacao.grupo.pendencias.count}}</span>
+                                  <span class="sr-only">pendência{{count|pluralize}}</span>
+                                {% endwith %}
+                              {% endif %}
+                            </a>
+                            <a href="{% url 'sair_grupo' participacao.grupo.id %}" class="btn btn-danger d-block">Sair do grupo</a>
+                          {% else %}
+                            Aguarde {{participacao.grupo.criador.nome}} te confirmar no grupo
+                            <a href="{% url 'sair_grupo' participacao.grupo.id %}" class="btn btn-danger d-block">Cancelar</a>
+                          {% endif %}
                         {% else %}
-                          <a href="{% url 'grupo_cadastro' atividade.id %}" class="btn btn-success my-1">Criar grupo</a>
-                          <a href="" class="btn btn-info my-1">Entrar em grupo</a>
+                          {% if atividade.aceita_grupos %}
+                            <a href="{% url 'grupo_cadastro' atividade.id %}" class="btn btn-success my-1">Criar grupo</a>
+                          {% endif %}
+                          <button data-toggle="modal" data-modal="Page" data-target="#entrar_grupo_atv{{atividade.id}}" data-url="{% url 'grupos' atividade.id %}" data-title="Entrar em um grupo para a atividade {{atividade}}" data-size="lg" class="btn btn-info my-1 autocreate">Entrar em grupo</button>
                         {% endif %}
                       {% endif %}
                     </div>
@@ -85,8 +101,8 @@
             {% endfor %}
           </div>
         </div>
-      {% endwith %}
-    </div>
+      </div>
+    {% endwith %}
   </div>
 {% endblock %}
 
@@ -96,19 +112,18 @@
   <script type="text/javascript">
     $(() => {
       const csrf_token = $("[name=csrfmiddlewaretoken]").val()
-      
-      ModalDeletion.create_from_buttons()
 
       turma_cadastro = MF(
         'turma_cadastro', 
         'Cadastrar nova turma',
-        `{% spaceless %}{% include "form.html" with form=turma_form only %}{% endspaceless %}`,
+        '{% url "turma_cadastro" %}',
         csrf_token
-      ).on_open = check_checkbox;
-      {% if turma_form.errors %}
-        turma_cadastro.open();
-      {% endif %}
+      )
+      turma_cadastro.on_get = format_all_checkboxes;
+      turma_cadastro.on_save = function() {
+        location.reload()
+      }
     });
   </script>
-  <script src="{% static 'js/check_checkbox.js' %}"></script>
+  <script src="{% static 'js/checkbox.js' %}"></script>
 {% endblock %}

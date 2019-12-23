@@ -43,10 +43,16 @@
   <!-- Page Content -->
   <div class="container mt-5">
     <div class="row">
-      {% spaceless %}
-        {% block conteudo %}
-        {% endblock %}
-      {% endspaceless %}
+      {% for message in messages %}
+        <div class="alert alert-{{message.tags}} alert-dismissible fade show w-100" role='alert'>
+          <p>{{message}}</p>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+              <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      {% endfor %}
+      {% block conteudo %}
+      {% endblock %}
     </div>
   </div>
   <footer class="footer mt-5 text-center">
@@ -73,15 +79,8 @@
   <script src="{% static 'jquery/jquery.cookie.js' %}"></script>
   <!--script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script-->
   <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+  <script src="{% static 'jquery/jquery.ba-throttle-debounce.min.js' %}"></script>
   {% block scripts %}
-    <script type="text/javascript">
-      $((e) => {
-        $('button[name=abrir_cadastro]').click((e) => {
-          $button = $(e.target);
-          window.open($button.val());
-        });
-      });
-    </script>
   {% endblock %}
 </body>
 </html>

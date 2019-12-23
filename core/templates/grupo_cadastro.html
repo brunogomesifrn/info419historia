@@ -1,5 +1,5 @@
-{% extends "base.html" %}
-{% load widget_tweaks %}
+﻿{% extends "base.html" %}
+{% load widget_tweaks static %}
 
 {% block conteudo %}
   <div class="col-12 text-center">
@@ -11,3 +11,7 @@
     </form>
   </div>
 {% endblock conteudo %}
+
+{% block scripts %}
+	<script script="{% static 'js/checkbox.js' %}"></script>
+{% endblock %}

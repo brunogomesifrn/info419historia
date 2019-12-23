@@ -5,7 +5,7 @@
       <h4>Documento {{n}}</h4>
     {% endif %}
     <h5>Título: {{documento.titulo}}</h5>
-    {% if documento.arquivo  == '' %}
+    {% if documento.texto %}
       <div class="texto">
         <p>{{documento.texto}}</p>
       </div>

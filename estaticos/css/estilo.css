@@ -1,4 +1,4 @@
-body, .modal-body {
+﻿body, .modal-body {
 	background-color: #7FBEC0;
 }
 
@@ -15,9 +15,21 @@ html, body {
 .footer, .modal-footer {
     background-color: #4F8E90;
 }
+
 .listagem {
 	background-color: #87CEFA;
     border-radius: 1rem;
+}
+
+.listagem .row {
+	flex-wrap: nowrap;
+	width: 100%;
+    overflow-x: auto;
+}
+
+.listagem .row .col-lg-3 {
+	display: inline-block;
+	float: none;
 }
 
 .card, .card-body {
@@ -69,8 +81,28 @@ html, body {
 	box-shadow: 5px 5px 5px rgba(68,68,68,0.6);
 }
 
+.alternativa.cursor-pointer:hover {
+	background-color: #efefbd;
+}
+
 .alternativa .peso {
 	background-color: rgba(0, 0, 0, 0.2);
+}
+
+.alternativa.selected {
+	background-color: #f9ee9e;
+}
+
+.alternativa.selected.cursor-pointer:hover {
+	background-color: #e9de8e;
+}
+
+.alternativa.selected.sent {
+	background-color: #bcd1dc;
+}
+
+.form-group.sent .alternativa {
+	cursor: default;
 }
 
 .alternativa-form {
@@ -93,16 +125,29 @@ html, body {
     margin-top: .25rem;
 }
 
+.erro > input, .erro > select, .erro > textarea {
+  border-color: #dc3545;
+}
+
+.erro > div.form-control:first-of-type{
+  border-top-color: #dc3545;
+}
+
+.erro > div.form-control {
+  border-left-color: #dc3545;
+  border-right-color: #dc3545;
+}
+
+.erro > div.form-control:last-of-type{
+  border-bottom-color: #dc3545;
+}
+
+.erro > small {
+	color: #bc1525;
+}
+
 a, .btn-link {
     color: #4433FF;
-}
-
-.selected {
-	background-color: #f9ee9e;
-}
-
-.selected.sent {
-	background-color: #bcd1dc;
 }
 
 /*h1 span, h2 span, h3 span, h4 span, h5 span {
@@ -132,9 +177,37 @@ a, .btn-link {
 	border-color: #ac0515;
 }
 
+.separador {
+	height: 1rem;
+	line-height: 1rem;
+	padding: 0; 
+}
+
+.cursor-pointer {
+	cursor: pointer;
+}
+
+@media (max-width: 576px) {
+	.w-25 {
+		width: 100% !important;
+	}
+}
+
+.form-control {
+	height: auto;
+}
+
 .form-control:not(.btn) {
 	border-radius: 1rem;
 	background-color: rgba(255, 255, 255, 0.8);
+}
+
+.form-control.cursor-pointer:hover {
+	background-color: rgba(250, 250, 250, 0.8);	
+}
+
+.form-control.cursor-pointer * {
+	pointer-events: none;
 }
 
 .form-control.btn-primary:focus {

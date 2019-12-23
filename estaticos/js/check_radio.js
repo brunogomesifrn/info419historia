@@ -1,10 +1,16 @@
-$(() => {
+﻿$(() => {
   $input_radio = $('input[type=radio]');
   $input_radio_checked = $input_radio.filter(':checked');
-  $input_radio_checked.parents('.form-control, .alternativa').addClass('selected')
-  $input_radio_checked.filter(':disabled').parents('.form-control, .alternativa').addClass('sent')
+
+  $input_radio_checked
+    .parents('.alternativa').addClass('selected');
+
+  $input_radio_checked.filter(':disabled')
+    .parents('.alternativa').addClass('sent').removeClass('cursor-pointer')
+      .siblings('.alternativa').removeClass('cursor-pointer');
+
   $input_radio.change((e) => {
-    $(e.target).parents('.form-control, .alternativa').addClass('selected')
+    $(e.target).parents('.alternativa').addClass('selected')
       .siblings('.selected').removeClass('selected')
   }).parents('.form-control, .alternativa').each((i, el) => {
     $(el).click((e) => {

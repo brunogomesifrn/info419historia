@@ -1,30 +1,24 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required, permission_required
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models.aggregates import Sum
 from django.utils import timezone
-from django.middleware.csrf import get_token
-from .forms import *
-from .models import *
-
-# __all__ = ()
+from django.http import JsonResponse
+from . import models, forms
 
 agora = timezone.now()
 
 
 @login_required
 def perfil(request):
-    turmas = Turma.objects.filter(membros=request.user).order_by('nome')
-    atividades = Atividade.objects.order_by('fim')
-    if not request.user.is_professor():
+    turmas = models.Turma.objects.filter(membros=request.user)
+    atividades = models.Atividade.objects.filter(turmas__in=turmas).distinct()
+    if not request.user.is_professor:
         atividades = atividades.filter(inicio__lte=agora)
 
-    acao = request.POST.get('acao')
-    turma_form = _turma_form(request)
-
     contexto = {
-        'turma_form': turma_form,
         'turmas': turmas,
         'atividades': atividades,
         'agora': agora
@@ -43,7 +37,7 @@ def perfil(request):
 @login_required
 @permission_required('core.view_usuario', raise_exception=True)
 def usuarios(request):
-    usuarios = Usuario.objects.order_by('nome')
+    usuarios = models.Usuario.objects.order_by('nome')
     contexto = {
         'usuarios': usuarios,
     }
@@ -51,7 +45,7 @@ def usuarios(request):
 
 
 def registro(request):
-    form = UsuarioCriacaoForm(request.POST or None)
+    form = forms.UsuarioCriacaoForm(request.POST or None)
     if form.is_valid():
         form.save()
         return redirect('login')
@@ -64,7 +58,7 @@ def registro(request):
 
 @login_required
 def usuario_edicao(request, id):
-    usuario = get_object_or_404(Usuario, pk=id)
+    usuario = get_object_or_404(models.Usuario, pk=id)
     atual = request.user
     if not atual.has_perm('core.change_usuario') and usuario != atual:
         raise PermissionDenied
@@ -76,7 +70,7 @@ def usuario_edicao(request, id):
         else:
             usuario.groups.set([Group.objects.get(name__startswith="A")])
         return redirect('usuarios')
-    form = UsuarioEdicaoForm(request.POST or None, instance=usuario)
+    form = forms.UsuarioEdicaoForm(request.POST or None, instance=usuario)
     if form.is_valid():
         form.save()
         return redirect('usuarios')
@@ -91,7 +85,7 @@ def usuario_edicao(request, id):
 @login_required
 @permission_required('core.delete_usuario', raise_exception=True)
 def usuario_remocao(request, id):
-    usuario = get_object_or_404(Usuario, pk=id)
+    usuario = get_object_or_404(models.Usuario, pk=id)
     usuario.delete()
     return render(request, 'usuarios.html')
 
@@ -99,7 +93,7 @@ def usuario_remocao(request, id):
 @login_required
 @permission_required('core.view_turma', raise_exception=True)
 def turma(request, id):
-    turma = get_object_or_404(Turma, pk=id)
+    turma = get_object_or_404(models.Turma, pk=id)
     contexto = {
         'turma': turma,
     }
@@ -108,36 +102,35 @@ def turma(request, id):
 
 @login_required
 @permission_required('core.add_turma', raise_exception=True)
-def _turma_form(request):
-    acao = request.POST.get('acao')
-    form = TurmaForm()
-    if acao == "turma_cadastro":
-        form = TurmaForm(request.POST or None)
-        if form.is_valid():
-            form.save()
-            return TurmaForm()
-    return form
+def turma_cadastro(request):
+    form = forms.TurmaForm(data=request.POST or None)
+    if form.is_valid():
+        turma = form.save()
+        return JsonResponse({'id': turma.id})
+    contexto = {
+        'form': form
+    }
+    return render(request, 'form.html', contexto)
 
 
 @login_required
 @permission_required('core.change_turma', raise_exception=True)
 def turma_edicao(request, id):
-    turma = get_object_or_404(Turma, pk=id)
-    form = TurmaForm(request.POST or None, instance=turma)
+    turma = get_object_or_404(models.Turma, pk=id)
+    form = forms.TurmaForm(data=request.POST or None, instance=turma)
     if form.is_valid():
         form.save()
         return redirect('turma', id)
     contexto = {
-        'form': form,
-        'titulo': 'Editar turma %s' % turma,
+        'form': form
     }
-    return render(request, 'turma_cadastro.html', contexto)
+    return render(request, 'form.html', contexto)
 
 
 @login_required
 @permission_required('core.delete_turma', raise_exception=True)
 def turma_remocao(request, id):
-    turma = get_object_or_404(Turma, pk=id)
+    turma = get_object_or_404(models.Turma, pk=id)
     turma.delete()
     return redirect('perfil')
 
@@ -145,22 +138,13 @@ def turma_remocao(request, id):
 def atividade_formulario(request,
                          titulo,
                          atividade=None):
-    acao = request.POST.get('acao')
-
-    turma_form = _turma_form(request)
-    documento_form, tipo_form = _documento_form(request)
-
-    breakpoint()
-    atividade_form = AtividadeForm(data=request.POST or None,
-                                   instance=atividade)
+    atividade_form = forms.AtividadeForm(data=request.POST or None,
+                                         instance=atividade)
     if atividade_form.is_valid():
         atividade = atividade_form.save()
         return redirect('atividade', atividade.id)
 
     contexto = {
-        'turma_form': turma_form,
-        'documento_form': documento_form,
-        'tipo_form': tipo_form,
         'atividade_form': atividade_form,
         'titulo': titulo,
     }
@@ -180,10 +164,18 @@ def atividade_cadastro(request):
 @permission_required('core.change_questao', raise_exception=True)
 @permission_required('core.change_alternativa', raise_exception=True)
 def atividade_edicao(request, id):
-    atividade = get_object_or_404(Atividade, pk=id)
-    return atividade_formulario(request,
-                                'Editar atividade',
-                                atividade)
+    atividade = get_object_or_404(models.Atividade, pk=id)
+
+    if atividade.fim > agora:
+        return atividade_formulario(request, 'Editar atividade', atividade)
+
+    messages.add_message(
+        request,
+        messages.ERROR,
+        'Não é possível editar uma atividade que já acabou'
+    )
+
+    return redirect('perfil')
 
 
 @login_required
@@ -191,34 +183,35 @@ def atividade_edicao(request, id):
 @permission_required('core.view_questao', raise_exception=True)
 @permission_required('core.view_alternativa', raise_exception=True)
 def atividade(request, id):
-    atividade = get_object_or_404(Atividade, pk=id)
+    atividade = get_object_or_404(models.Atividade, pk=id)
     contexto = {
         'atividade': atividade,
         'agora': agora,
     }
-    if request.user.is_professor():
+    if request.user.is_professor:
         return render(request, 'atividade.html', contexto)
+    participacao = request.user.get_participacao(atividade)
+    if not participacao:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "Você precisa estar em um grupo para resolver a atividade"
+        )
+        return redirect('perfil')
 
-    grupo = request.user.get_grupo(atividade)
-    if not grupo:
-        return redirect('grupo_cadastro', id)
+    formset = forms.RespostaFormSet(
+        grupo=participacao.grupo, data=request.POST or None
+    )
 
-    forms = []
-    for n, questao in enumerate(atividade.questao_set.all(), start=1):
-        resposta, criada = Resposta.objects.get_or_create(grupo=grupo,
-                                                          questao=questao)
-        forms.append(RespostaForm(resposta,
-                                  request.POST or None,
-                                  prefix="questao%s" % n,
-                                  use_required_attribute=False))
-
-    acao = request.POST.get('acao', '')
+    acao = request.POST.get('acao')
     if acao == 'salvar' or acao == 'enviar':
-        for form in forms:
-            if form.is_valid():
-                form.save(enviar=(acao == 'enviar'))
-        return redirect('atividade', id)
-    contexto['forms'] = forms
+        if formset.is_valid():
+            formset.save()
+            return redirect('atividade', id)
+    contexto.update({
+        'formset': formset,
+        'participacao': participacao
+    })
     return render(request, 'atividade_responder.html', contexto)
 
 
@@ -227,19 +220,29 @@ def atividade(request, id):
 @permission_required('core.delete_questao', raise_exception=True)
 @permission_required('core.delete_alternativa', raise_exception=True)
 def atividade_remocao(request, id):
-    atividade = get_object_or_404(Atividade, pk=id)
-    atividade.delete()
+    atividade = get_object_or_404(models.Atividade, pk=id)
+    if atividade.fim > agora:
+        atividade.delete()
+    else:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Não é possível apagar uma atividade que já acabou'
+        )
+
     return redirect('perfil')
 
 
 def gerar_notas(request, atividade_id):
-    grupos = Grupo.objects.filter(atividade__id=atividade_id)
-    atividade = grupos[0].atividade
-    nota_total = atividade.questao_set.aggregate(Sum('peso'))['peso__sum']
+    atividade = get_object_or_404(models.Atividade, pk=atividade_id)
+    grupos = models.Grupo.objects.filter(atividade__pk=atividade_id)
+    nota_total = atividade.questoes.aggregate(Sum('peso'))['peso__sum']
     for grupo in grupos:
         nota = 0
-        for questao in atividade.questao_set.all():
-            resposta = Resposta.objects.get(grupo=grupo, questao=questao)
+        for questao in atividade.questoes.all():
+            resposta = models.Resposta.objects.get(
+                grupo=grupo, questao=questao
+            )
             if resposta.enviada:
                 nota += resposta.escolha.peso * questao.peso
         nota *= 20 / nota_total
@@ -251,38 +254,102 @@ def gerar_notas(request, atividade_id):
 @login_required
 @permission_required('core.view_grupo', raise_exception=True)
 def grupos(request, atividade_id):
-    atividade = get_object_or_404(Atividade, pk=atividade_id)
-    grupos = Grupo.objects.filter(atividade__id=atividade_id)
-    sem_grupo = Usuario.objects.filter(groups__name__startswith="A",
-                                       grupo__isnull=True)
+    atividade = get_object_or_404(models.Atividade, pk=atividade_id)
+    grupos = models.Grupo.objects.filter(atividade__id=atividade_id)
+
     contexto = {
-        'grupos': grupos,
+        'grupos': grupos
+    }
+
+    if not request.user.is_professor:
+        return render(request, 'entrar_grupo.html', contexto)
+
+    sem_grupo = models.Usuario.objects.filter(groups__name__startswith="A",
+                                              grupos__isnull=True)
+    contexto.update({
         'titulo': "Grupos da atividade %s" % atividade,
         'sem_grupo': sem_grupo,
-    }
+    })
     return render(request, 'grupos.html', contexto)
 
 
 @login_required
 @permission_required('core.add_grupo', raise_exception=True)
 def grupo_cadastro(request, atividade_id):
-    atividade = get_object_or_404(Atividade, pk=atividade_id)
-    form = GrupoCriacaoForm(atividade, request.POST or None)
-    if form.is_valid():
-        form.save()
-        return redirect('grupos', atividade_id)
-    contexto = {
-        'form': form,
-        'titulo': "Cadastro de grupo para a atividade \"%s\"" % atividade,
-    }
-    return render(request, 'grupo_cadastro.html', contexto)
+    atividade = get_object_or_404(models.Atividade, pk=atividade_id)
+    grupo = models.Grupo(atividade=atividade)
+    participacao = models.Participacao(
+        grupo=grupo,
+        aluno=request.user,
+        criador=True,
+        confirmado=True
+    )
+    try:
+        grupo.full_clean()
+        participacao.full_clean(exclude=('grupo',))
+        grupo.save()
+        participacao.grupo = grupo
+        participacao.save()
+    except ValidationError as e:
+        for erros in e.message_dict.values():
+            for erro in erros:
+                messages.add_message(request, messages.ERROR, erro)
+        return redirect('perfil')
+    return redirect('atividade', atividade.id)
+
+
+def entrar_grupo(request, id):
+    grupo = get_object_or_404(models.Grupo, pk=id)
+    participacao = models.Participacao(
+        grupo=grupo,
+        aluno=request.user
+    )
+    try:
+        participacao.full_clean(exclude=('grupo',))
+        participacao.save()
+        messages.add_message(
+            request,
+            messages.INFO,
+            "Aguare %s confirmar a sua participação no grupo" % (
+                grupo.criador.nome
+            )
+        )
+    except ValidationError as e:
+        for erros in e.message_dict.values():
+            for erro in erros:
+                messages.add_message(request, messages.ERROR, erro)
+    return redirect('perfil')
+
+
+@login_required
+def sair_grupo(request, id):
+    participacao = models.Participacao.objects.get(
+        grupo__pk=id, aluno__pk=request.user.id
+    )
+    grupo = participacao.grupo
+    if grupo.participacoes.count() == 1:
+        grupo.delete()
+        mensagem = "Você saiu do grupo e ele foi excluído"
+    else:
+        participacao.delete()
+        if not grupo.criador:
+            novo = grupo.participacoes.first()
+            novo.criador = True
+            novo.save()
+            mensagem = "Você saiu do grupo e agora %s o administra" % (
+                novo.aluno.nome
+            )
+        else:
+            mensagem = "Você saiu do %s" % grupo
+    messages.add_message(request, messages.INFO, mensagem)
+    return redirect('perfil')
 
 
 @login_required
 @permission_required('core.change_grupo', raise_exception=True)
 def grupo_edicao(request, id):
-    grupo = get_object_or_404(Grupo, pk=id)
-    form = GrupoEdicaoForm(request.POST or None, instance=grupo)
+    grupo = get_object_or_404(models.Grupo, pk=id)
+    form = forms.GrupoEdicaoForm(request.POST or None, instance=grupo)
     if form.is_valid():
         form.save()
         return redirect('grupos', grupo.atividade.id)
@@ -296,17 +363,46 @@ def grupo_edicao(request, id):
 @login_required
 @permission_required('core.delete_grupo', raise_exception=True)
 def grupo_remocao(request, id):
-    grupo = get_object_or_404(Grupo, pk=id)
+    grupo = get_object_or_404(models.Grupo, pk=id)
     atividade_id = grupo.atividade.id
     grupo.delete()
     return redirect('grupos', atividade_id)
 
 
 @login_required
+def grupo_aceitar(request, grupo_id, aluno_id):
+    participacao = models.Participacao.objects.get(
+        grupo__pk=grupo_id, aluno__pk=aluno_id
+    )
+    participacao.confirmado = True
+    participacao.save()
+    messages.add_message(
+        request,
+        messages.INFO,
+        "%s entrou grupo" % participacao.aluno.nome
+    )
+    return redirect('atividade', participacao.grupo.atividade.id)
+
+
+@login_required
+def grupo_rejeitar(request, grupo_id, aluno_id):
+    participacao = models.Participacao.objects.get(
+        grupo__pk=grupo_id, aluno__pk=aluno_id
+    )
+    participacao.delete()
+    messages.add_message(
+        request,
+        messages.INFO,
+        "%s não entrou no grupo" % participacao.aluno.nome
+    )
+    return redirect('atividade', participacao.grupo.atividade.id)
+
+
+@login_required
 @permission_required('core.view_documento', raise_exception=True)
 @permission_required('core.view_tipo', raise_exception=True)
 def documentos(request):
-    documentos = Documento.objects.all()
+    documentos = models.Documento.objects.all()
     contexto = {
         'documentos': documentos,
     }
@@ -315,26 +411,24 @@ def documentos(request):
 
 @login_required
 @permission_required('core.add_documento', raise_exception=True)
-@permission_required('core.add_tipo', raise_exception=True)
-def _documento_form(request):
-    acao = request.POST.get('acao')
-    form = DocumentoForm()
-    tipo_form = TipoForm()
-    if acao == 'documento_cadastro' or acao == "tipo_cadastro":
-        composicao = request.POST.get('documento-composicao')
-        if composicao == 0:
-            request.POST['documento-arquivo'] = None
-        elif composicao == 1:
-            request.POST['documento-texto'] = None
-        data = request.POST.copy()
-        tipo_form = TipoForm(data)
-        if tipo_form.is_valid():
-            tipo, created = Tipo.objects.get_or_create(**tipo_form.cleaned_data)
-            data['documento-tipo'] = tipo.pk
-            tipo_form = TipoForm()
-        form = DocumentoForm(data,
-                             request.FILES)
-        if form.is_valid():
-            form.save()
-            form = DocumentoForm()
-    return form, tipo_form
+@permission_required('core.add_tipodocumento', raise_exception=True)
+def documento_cadastro(request):
+    data = request.POST.copy()
+
+    tipo_form = forms.TipoDocumentoForm(data=data or None)
+    if tipo_form.is_valid():
+        tipo = tipo_form.save()
+        data['documento-tipo'] = tipo.pk
+
+    form = forms.DocumentoForm(
+        data=data or None,
+        files=request.FILES or None
+    )
+    if form.is_valid():
+        documento = form.save()
+        return JsonResponse({'id': documento.id})
+    contexto = {
+        'form': form,
+        'tipo_form': tipo_form,
+    }
+    return render(request, 'documento_cadastro.html', contexto)

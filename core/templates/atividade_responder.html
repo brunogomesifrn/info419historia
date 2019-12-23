@@ -6,15 +6,39 @@
   <div class="col-lg-12 text-center p-5">
     <h1>{{atividade}}</h1>
     <p><i class="far fa-clock"></i> {{atividade.fim|timeuntil|beautify}}</p>
+
+    {% for pendencia in participacao.grupo.pendencias %}
+      {% if forloop.first %}
+        <div class= "listagem mb-4 px-4 pt-4">
+          <div>
+            <h2 class="d-inline">Solicitações de entrada no grupo</h2>
+          </div>
+          <div class="row text-center mx-0 mt-4 pb-4">
+      {% endif %}
+            <div class="col-lg-4 col-sm-6 col-12 px-2">
+              <div class="card mt-4">
+                <div class="card-body">
+                  <h5 class="card-title">{{pendencia.aluno.nome_completo}}</h5>
+                  <a href="{% url 'grupo_aceitar' pendencia.grupo.id pendencia.aluno.id %}" class="btn btn-success d-block mt-2">Aceitar</a>
+                  <a href="{% url 'grupo_rejeitar' pendencia.grupo.id pendencia.aluno.id %}"  class="btn btn-danger d-block mt-2">Rejeitar</a>
+                </div>
+              </div>
+            </div>
+      {% if forloop.last%}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+
     <form method="post" class="mx-auto">
       {% csrf_token %}
-      {% for form in forms %}
+      {% for form in formset %}
         <div class="questao">
           <h4>Questão {{forloop.counter}}. {{form.resposta.questao.comando}}</h4>
           {% for documento in form.resposta.questao.documentos.all %}
             {% include 'documento.html' with documento=documento n=forloop.counter only %}
           {% endfor %}
-          {% include 'form.html' with form=form custum_radio_class='alternativa' only %}
+          {% include 'form.html' with form=form radio_class='alternativa' only %}
         </div>
       {% endfor %}
       {% if atividade.fim >= agora %}
@@ -23,6 +47,7 @@
       {% else %}
         <h4><span>Sinto muito! Você não pode mais enviar, o tempo da atividade acabou.<span></h4>
       {% endif %}
+      {{formset.management_form}}
     </form>
   </div>
 {% endblock %}

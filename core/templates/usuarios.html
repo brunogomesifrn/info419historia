@@ -9,7 +9,7 @@
             <th>Nome</th>
             <th>Matrícula</th>
             <th>Email</th>
-            <th>Professor</th>
+            <th>Tipo de usuário</th>
             <th>Ações</th>
           </tr>
         </thead>
@@ -19,7 +19,7 @@
               <td>{{usuario.nome}} {{usuario.sobrenome}}</td>
               <td>{{usuario.matricula}}</td>
               <td>{{usuario.email}}</td>
-              <td>{{usuario.is_professor|yesno:'Sim,Não'}}</td>
+              <td>{{usuario.is_professor|yesno:'Professor,Aluno'}}</td>
               <td>
                 <a href="{% url 'usuario_edicao' usuario.id %}"><button class="btn btn-success"><i class="fas fa-edit"></i></button></a>
                 <button class="btn btn-danger" data-toggle="modal" data-target="#confirmacao" data-nome="{{usuario.nome}}" data-url="{% url 'usuario_remocao' usuario.id %}"><i class="fas fa-trash"></i></button>
