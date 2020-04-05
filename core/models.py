@@ -2,9 +2,22 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Group
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils.functional import cached_property
+from django.dispatch import receiver
 from datetime import timedelta
 
-GRUPO_PROFESSOR = Group.objects.get_or_create(name='Professor')
+GRUPO_PROFESSOR, GRUPO_CRIADO = Group.objects.get_or_create(name='Professores')
+
+# Constantes usadas na persolanização dependendo da nota
+NOTA_PESSIMA = 0
+NOTA_RUIM = 1
+NOTA_BOA = 2
+NOTA_OTIMA = 3
+NOTAS_TAGS = {
+    NOTA_PESSIMA: 'danger',
+    NOTA_RUIM: 'warning',
+    NOTA_BOA: 'info',
+    NOTA_OTIMA: 'success',
+}
 
 
 class UserManager(BaseUserManager):
@@ -81,6 +94,7 @@ class Usuario(AbstractUser):
         """Checa se o usúario é professor."""
         return self.groups.filter(pk=GRUPO_PROFESSOR.pk).exists()
 
+    # deprecated
     def get_participacao(self, atividade):
         """
         Retorna o objeto do model Particapao vinculado ao usuário e
@@ -189,9 +203,11 @@ class Atividade(models.Model):
         """Retorna a represetação do model Atividade como string."""
         return self.assunto
 
-    def aceita_grupos(self):
-        """Checa se atividade ainda suporta a criação de novos grupos."""
-        return self.grupos.count() < self.n_grupos
+    # deprecated
+    # @cached_property
+    # def aceita_grupos(self):
+    #     """Checa se atividade ainda suporta a criação de novos grupos."""
+    #     return self.grupos.count() < self.n_grupos
 
     def clean(self, *args, **kwargs):
         """Checa se existe algum erro numa instância de Atividade."""
@@ -242,10 +258,29 @@ class Grupo(models.Model):
         Usuario,
         through='Participacao'
     )
+    criador = models.ForeignKey(
+        Usuario,
+        on_delete=models.DO_NOTHING,
+        limit_choices_to={
+            'pk__in': membros
+        },
+        related_name='criador_grupos'
+    )
     atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE)
 
     class Meta:
         default_related_name = "grupos"
+
+    # deprated
+    # @classmethod
+    # def prefetch_criador(cls, prefix=''):
+    #     return models.Prefetch(
+    #         '%sparticipacoes' % prefix,
+    #         queryset=Participacao.objects
+    #         .filter(criador=True).select_related('aluno')
+    #         .only('aluno__nome', 'grupo__id'),
+    #         to_attr='criador'
+    #     )
 
     def __str__(self):
         """Retorna a represetação do model Grupo como string."""
@@ -263,18 +298,36 @@ class Grupo(models.Model):
             })
         super().clean(*args, **kwargs)
 
-    @cached_property
-    def criador(self):
-        """Retorna o usuário criador do grupo."""
-        try:
-            return self.participacoes.get(criador=True).aluno
-        except ObjectDoesNotExist:
-            return None
+    # deprecated
+    # @cached_property
+    # def criador(self):
+    #     """Retorna o usuário criador do grupo."""
+    #     try:
+    #         return self.participacoes.get(criador=True).aluno
+    #     except ObjectDoesNotExist:
+    #         return None
+
+    # deprecated
+    # @cached_property
+    # def pendencias(self):
+    #     """Retorna as participações ainda não confirmadas do grupo."""
+    #     return self.participacoes.filter(confirmado=False)
 
     @cached_property
-    def pendencias(self):
-        """Retorna as participações ainda não confirmadas do grupo."""
-        return self.participacoes.filter(confirmado=False)
+    def nota_tag(self):
+        if not self.nota and self.nota != 0:
+            return ''
+
+        if self.nota >= 80:
+            return NOTAS_TAGS[NOTA_OTIMA]
+
+        if self.nota >= 60:
+            return NOTAS_TAGS[NOTA_BOA]
+
+        if self.nota >= 20:
+            return NOTAS_TAGS[NOTA_RUIM]
+
+        return NOTAS_TAGS[NOTA_PESSIMA]
 
 
 class Participacao(models.Model):
@@ -284,12 +337,12 @@ class Participacao(models.Model):
         Usuario,
         on_delete=models.CASCADE
     )
-    criador = models.BooleanField(default=False)
+    # criador = models.BooleanField(default=False)
     confirmado = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('grupo', 'aluno')
-        ordering = ('criador',)
+        # ordering = ('criador',)
         default_related_name = 'participacoes'
 
     def clean(self, *args, **kwargs):
@@ -301,11 +354,12 @@ class Participacao(models.Model):
                 'aluno': "Um professor não pode fazer parte de um grupo"
             })
 
-        # Checando se o grupo vinculado à participação já tem um criador.
-        if self.criador and self.grupo.criador:
-            raise ValidationError({
-                'criador': "O grupo só pode ter um criador"
-            })
+        # deprecated
+        # # Checando se o grupo vinculado à participação já tem um criador.
+        # if self.criador and self.grupo.criador:
+        #     raise ValidationError({
+        #         'criador': "O grupo só pode ter um criador"
+        #     })
 
         # Checando se o usuário vinculado à participação
         # já tem um grupo para essa atividade.
@@ -316,6 +370,19 @@ class Participacao(models.Model):
             })
 
         super().clean(*args, **kwargs)
+
+    @cached_property
+    def is_criador(self):
+        return self.aluno.pk == self.grupo.criador.pk
+
+
+@receiver(models.signals.pre_delete, sender=Participacao)
+def reset_grupo_criador(sender, **kwargs):
+    participacao = kwargs['instance']
+    grupo = participacao.grupo
+    if participacao.is_criador:
+        grupo.criador = grupo.membros.exclude(pk=grupo.criador.pk).first()
+        grupo.save()
 
 
 class Resposta(models.Model):

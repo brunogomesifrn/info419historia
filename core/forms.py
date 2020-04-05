@@ -459,10 +459,9 @@ class BaseRespostaFormSet(forms.BaseFormSet):
 
     def get_form_kwargs(self, index):
         form_kwargs = super().get_form_kwargs(index)
-        form_kwargs['resposta'], created = models.Resposta.objects.get_or_create(
-            grupo=self.grupo,
-            questao=self.questoes[index]
-        )
+        form_kwargs['resposta'], created = models.Resposta.objects \
+            .get_or_create(
+                grupo=self.grupo, questao=self.questoes[index])
         return form_kwargs
 
 

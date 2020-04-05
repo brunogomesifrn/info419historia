@@ -78,6 +78,7 @@ def _breakpoint(context, *args, **kwargs):
     breakpoint()
 
 
+# deprecated
 @register.filter
 def check(nota):
     if not nota and nota != 0:
@@ -89,4 +90,3 @@ def check(nota):
     if nota >= 20:
         return ' border-warning'
     return ' border-danger'
-

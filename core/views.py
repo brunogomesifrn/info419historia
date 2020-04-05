@@ -2,8 +2,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required, permission_required
-from django.core.exceptions import PermissionDenied, ValidationError
-from django.db.models.aggregates import Sum
+from django.core.exceptions import (
+    PermissionDenied, ValidationError, ObjectDoesNotExist
+)
+from django.db.models import Prefetch, Q, F, OuterRef, Subquery
+from django.db.models.aggregates import Sum, Count
+from django.db.models.expressions import RawSQL
 from django.utils import timezone
 from django.http import JsonResponse
 from . import models, forms
@@ -15,16 +19,89 @@ agora = timezone.now()
 def perfil(request):
     turmas = models.Turma.objects.filter(membros=request.user)
     atividades = models.Atividade.objects.filter(turmas__in=turmas).distinct()
-    if not request.user.is_professor:
-        atividades = atividades.filter(inicio__lte=agora)
 
     contexto = {
         'turmas': turmas,
         'atividades': atividades,
         'agora': agora
     }
-    return render(request, 'registration/perfil.html', contexto)
 
+    if request.user.is_professor:
+        return render(request, 'perfil_professor.html', contexto)
+
+    atividades = atividades.filter(inicio__lte=agora)
+    disponiveis = atividades.filter(fim__gte=agora)
+
+    participacoes = models.Participacao.objects.filter(
+        grupo__atividade__in=disponiveis,
+        aluno=request.user
+    ).annotate(
+        n_pendencias=Count(
+            'grupo__participacoes',
+            filter=Q(grupo__participacoes__confirmado=False)
+        )
+    ).select_related('grupo', 'grupo__atividade', 'grupo__criador') \
+     .only(
+        'grupo', 'confirmado', 'aluno', 'grupo__atividade',
+        'grupo__criador__nome', 'grupo__atividade__assunto'
+    )
+
+    sem_grupo = disponiveis.exclude(grupos__participacoes__in=participacoes) \
+                           .annotate(
+                               n_grupos_atual=Count('grupos', distinct=True))
+    terminadas = atividades.filter(fim__lte=agora).prefetch_related(
+        Prefetch(
+            'grupos',
+            queryset=models.Grupo.objects.filter(membros=request.user)
+                                         .only('nota', 'atividade'),
+            to_attr='grupo'
+        )
+    )
+
+    contexto.update({
+        'participacoes': participacoes,
+        'sem_grupo': sem_grupo,
+        'terminadas': terminadas,
+    })
+
+    # contexto['atividades'] = (
+    #     atividades.filter(inicio__lte=agora).annotate(
+    #         Subquery(
+    #             models.Participacao.objects.filter(
+    #                 grupo__atividade=OuterRef('pk'),
+    #                 aluno=request.user
+    #             ).only('id'),
+    #         n_grupos_atual=Count('grupos', distinct=True)
+    #         )
+    #     )
+    # )
+    # .prefetch_related(
+    #     Prefetch(
+    #         'grupos',
+    #         queryset=(
+    #             models.Grupo.objects.filter(
+    #                 participacoes__aluno=request.user
+    #             )
+    #             .annotate(
+    #                 n_pendencias=Count(
+    #                     'participacoes',
+    #                     filter=Q(participacoes__confirmado=False)
+    #                 )
+    #             )
+    #             .select_related('criador')
+    #         ),
+    #         to_attr='grupo'
+    #     ),
+    #     Prefetch(
+    #         'grupo__participacoes',
+    #         queryset=models.Participacao.objects.filter(aluno=request.user),
+    #         to_attr='participacao',
+    #     ),
+    # )
+    return render(request, 'perfil_aluno.html', contexto)
+
+
+# decrepated
 # @login_required
 # def turmas(request):
 #     turmas = Turma.objects.order_by('nome')
@@ -235,19 +312,44 @@ def atividade_remocao(request, id):
 
 def gerar_notas(request, atividade_id):
     atividade = get_object_or_404(models.Atividade, pk=atividade_id)
-    grupos = models.Grupo.objects.filter(atividade__pk=atividade_id)
+    grupos = models.Grupo.objects.filter(
+        atividade__pk=atividade_id
+    ).prefetch_related(
+        Prefetch(
+            'participacoes',
+            queryset=models.Participacao.objects.filter(confirmado=False),
+            to_attr='nao_confirmados'
+        )
+    )
     nota_total = atividade.questoes.aggregate(Sum('peso'))['peso__sum']
+    sem_grupo = models.Usuario.objects.filter(groups__name="Alunos")
     for grupo in grupos:
+        for participacao in grupo.nao_confirmados:
+            participacao.delete()
+        sem_grupo = sem_grupo.exclude(pk__in=grupo.membros.all())
         nota = 0
         for questao in atividade.questoes.all():
-            resposta = models.Resposta.objects.get(
-                grupo=grupo, questao=questao
-            )
-            if resposta.enviada:
-                nota += resposta.escolha.peso * questao.peso
+            try:
+                resposta = models.Resposta.objects.get(
+                    grupo=grupo, questao=questao
+                )
+                if resposta.enviada:
+                    nota += resposta.escolha.peso * questao.peso
+            except ObjectDoesNotExist:
+                pass
         nota *= 20 / nota_total
         grupo.nota = nota
         grupo.save()
+    grupo = models.Grupo.objects.create(
+        atividade=atividade, nota=0, criador=sem_grupo.first()
+    )
+    for aluno in sem_grupo:
+        participacao = models.Participacao.objects.create(
+            grupo=grupo,
+            aluno=aluno,
+            confirmado=True
+        )
+
     return redirect('atividade', atividade_id)
 
 
@@ -264,7 +366,7 @@ def grupos(request, atividade_id):
     if not request.user.is_professor:
         return render(request, 'entrar_grupo.html', contexto)
 
-    sem_grupo = models.Usuario.objects.filter(groups__name__startswith="A",
+    sem_grupo = models.Usuario.objects.filter(groups__name="Alunos",
                                               grupos__isnull=True)
     contexto.update({
         'titulo': "Grupos da atividade %s" % atividade,
@@ -299,7 +401,7 @@ def grupo_cadastro(request, atividade_id):
 
 
 def entrar_grupo(request, id):
-    grupo = get_object_or_404(models.Grupo, pk=id)
+    grupo = get_object_or_404(models.Grupo.select_related('criador'), pk=id)
     participacao = models.Participacao(
         grupo=grupo,
         aluno=request.user
@@ -323,21 +425,22 @@ def entrar_grupo(request, id):
 
 @login_required
 def sair_grupo(request, id):
-    participacao = models.Participacao.objects.get(
+    participacao = get_object_or_404(
+        models.Participacao.objects.select_related('grupo')
+                                   .annotate(n_membros=Count(
+                                       'grupo__participacoes'
+                                   )),
         grupo__pk=id, aluno__pk=request.user.id
     )
     grupo = participacao.grupo
-    if grupo.participacoes.count() == 1:
+    if participacao.n_membros == 1:
         grupo.delete()
         mensagem = "Você saiu do grupo e ele foi excluído"
     else:
         participacao.delete()
-        if not grupo.criador:
-            novo = grupo.participacoes.first()
-            novo.criador = True
-            novo.save()
+        if participacao.is_criador:
             mensagem = "Você saiu do grupo e agora %s o administra" % (
-                novo.aluno.nome
+                participacao.grupo.criador.nome
             )
         else:
             mensagem = "Você saiu do %s" % grupo

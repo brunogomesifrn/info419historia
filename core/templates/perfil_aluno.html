@@ -1,0 +1,89 @@
+{% extends "perfil.html" %}
+
+{% block turma_acao %}
+  <a href="{% url 'turma' turma.id %}" class="btn btn-info d-block">Acessar</a>
+{% endblock %}
+
+{% block turma_empty %}
+  <h5>Você não está em nenhuma turma! Fale com algum professor para entrar em uma.</h5>
+{% endblock %}
+
+{% block atividades_body %}
+  {% for participacao in participacoes %}
+    {% if forloop.first %}
+      <h3 class="mt-4">Para fazer</h3>
+      <div class="row text-center mx-0 pb-4">
+    {% endif %}
+        <div class="col-lg-3 col-md-4 col-sm-6 col-12 px-2">
+          {% with grupo=participacao.grupo %}
+            <div class="card">
+              <div class="card-body">
+                {% with atividade=grupo.atividade %}
+                  <h5 class="card-title">{{atividade}}</h5>
+                  {% if participacao.confirmado %}
+                    <a href="{% url 'atividade' atividade.id %}" class="btn btn-info d-block my-1">
+                      Resolver
+                      {% if participacao.is_criador and grupo.n_pendencias %}
+                        {% with n=grupo.n_pendencias %}
+                          <span class="badge badge-pill badge-light">{{n}}</span>
+                          <span class="sr-only">pendência{{n|pluralize}}</span>
+                        {% endwith %}
+                      {% endif %}
+                    </a>
+                  {% else %}
+                    Aguarde {{grupo.criador.nome}} te confirmar no grupo
+                  {% endif %}
+                  <a href="{% url 'sair_grupo' grupo.id %}" class="btn btn-danger d-block my-1">Sair do grupo</a>
+                {% endwith %}
+              </div>
+            </div>
+          {% endwith %}
+        </div>
+    {% if forloop.last %}
+      </div>
+    {% endif %}
+  {% endfor %}
+  {% for atividade in sem_grupo %}
+    {% if forloop.first %}
+      <h3 class="mt-4">Sem grupo</h3>
+      <div class="row text-center mx-0 pb-4">
+    {% endif %}
+        <div class="col-lg-3 col-md-4 col-sm-6 col-12 px-2">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">{{atividade}}</h5>
+              {% if atividade.n_grupos_atual < atividade.n_grupos %}
+                <a href="{% url 'grupo_cadastro' atividade.id %}" class="btn btn-success d-block my-1">Criar grupo</a>
+              {% endif %}
+              <button data-toggle="modal" data-modal="Page" data-target="#entrar_grupo_atv{{atividade.id}}" data-url="{% url 'grupos' atividade.id %}" data-title="Entrar em um grupo para a atividade {{atividade}}" data-size="lg" class="btn btn-info d-block my-1 w-100 autocreate">Entrar em grupo</button>
+            </div>
+          </div>
+        </div>
+    {% if forloop.last %}
+      </div>
+    {% endif %}
+  {% endfor %}
+  {% for atividade in terminadas %}
+    {% if forloop.first %}
+      <h3 class="mt-4">Terminadas</h3>
+      <div class="row text-center mx-0 pb-4">
+    {% endif %}
+        <div class="col-lg-3 col-md-4 col-sm-6 col-12 px-2">
+          {% with grupo=atividade.grupo.0 %}
+            <div class="card border-{{grupo.nota_tag}}">
+              <div class="card-body">
+                <h5 class="card-title">{{atividade}}</h5>
+                {% if not grupo.nota and grupo.nota != 0 %}
+                  Aguarde a liberação das notas
+                {% else %}
+                  Nota: {{grupo.nota}}
+                {% endif %}
+              </div>
+            </div>
+          {% endwith %}
+        </div>
+    {% if forloop.last %}
+      </div>
+    {% endif %}
+  {% endfor %}
+{% endblock %}
